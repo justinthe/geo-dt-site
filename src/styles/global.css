@@ -5,7 +5,7 @@
 
 /* ── Tokens ─────────────────────────────────────────────
    Map-sheet world: printed map paper, forest-teal ink, terracotta index contours.
-   Light by default (read at a desk or on a phone in daylight); night map for dark. */
+   Light by default, whatever the visitor's system setting; the night map applies only when they choose it with the toggle. */
 :root {
   --paper: oklch(0.972 0.007 125);
   --paper-2: oklch(0.945 0.013 135);
@@ -53,25 +53,6 @@
   --select: oklch(0.42 0.07 60);
   color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --paper: oklch(0.2 0.018 205);
-    --paper-2: oklch(0.235 0.022 200);
-    --paper-3: oklch(0.275 0.025 195);
-    --sea: oklch(0.225 0.03 225);
-    --ink: oklch(0.93 0.014 150);
-    --ink-soft: oklch(0.84 0.018 160);
-    --teal: oklch(0.8 0.075 182);
-    --line: oklch(0.6 0.05 185);
-    --hair: oklch(0.34 0.02 195);
-    --muted: oklch(0.72 0.016 190);
-    --index: oklch(0.72 0.13 52);
-    --index-ink: oklch(0.78 0.11 55);
-    --select: oklch(0.42 0.07 60);
-    color-scheme: dark;
-  }
-}
-
 /* ── Base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: 1.5rem; }

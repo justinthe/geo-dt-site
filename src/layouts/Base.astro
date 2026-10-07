@@ -132,8 +132,7 @@ const ogImage = image && new URL(image, Astro.site).href;
     <script>
       const root = document.documentElement;
       document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
-        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-        root.dataset.theme = dark ? 'light' : 'dark';
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
         try { localStorage.setItem('theme', root.dataset.theme); } catch {}
         window.dispatchEvent(new Event('themechange'));
       });

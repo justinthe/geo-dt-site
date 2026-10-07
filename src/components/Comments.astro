@@ -15,7 +15,7 @@ const g = site.giscus;
 <script>
   // Giscus loads only when the comments come into view (FR-11). One thread per translationKey, shared by both languages.
   const slot = document.querySelector<HTMLElement>('[data-giscus]');
-  const theme = () => (document.documentElement.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' ? 'dark' : 'light';
+  const theme = () => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   if (slot) {
     const c = JSON.parse(slot.dataset.giscus!);
     new IntersectionObserver((es, io) => {

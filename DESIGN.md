@@ -103,7 +103,7 @@ Every page is one sheet in an Indonesian topographic map series. A sheet has a c
 
 The system is text-first, calm, and dense in the way printed cartography is dense: many hairline rules, few fills, one warm accent. Depth comes from rule weight (ink rule vs. hair rule), not from shadow. Cartographic furniture is functional, never ornament: the scale bar measures reading time, the legend links to categories, the sheet number is the item's ID, the coordinates are the project's first region.
 
-The world carries a night-map dark theme (deep teal-slate paper, pale ink, brighter terracotta), switched by system preference or the header toggle. Every token has a night counterpart; nothing is hard-coded per theme.
+The world carries a night-map dark theme (deep teal-slate paper, pale ink, brighter terracotta), applied only when the visitor chooses it with the header toggle (the site is light by default, whatever the system setting). Every token has a night counterpart; nothing is hard-coded per theme.
 
 **Key Characteristics:**
 - Neatline frame (ink rule plus offset hair outline) with graticule ticks every 72px around every sheet and listing.
@@ -140,7 +140,7 @@ Printed map paper and forest-teal ink with a single terracotta index colour; res
 
 **The Two Inks Rule.** Every divider is either ink (structural: frame, header, top of a list, table head) or hair (between peers). There is no third rule colour and no grey box fill standing in for a rule.
 
-**The Night Map Rule.** Dark mode is a re-inked sheet, not an inverted one: every token is redefined under `[data-theme='dark']` and the system preference, so components only ever reference tokens.
+**The Night Map Rule.** Dark mode is a re-inked sheet, not an inverted one: every token is redefined under `[data-theme='dark']`, so components only ever reference tokens.
 
 ## Typography
 
