@@ -1,0 +1,58 @@
+---
+// Loads MapLibre only on pages with a map, and only when a map scrolls into view (FR-16, NFR-2).
+---
+<script>
+  // MapLibre finds its worker next to its own file, which bundling moves: hand it the bundled worker instead.
+  import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+  // Linked at runtime, so pages without a map never load MapLibre's stylesheet.
+  import cssUrl from 'maplibre-gl/dist/maplibre-gl.css?url';
+  const canvases = document.querySelectorAll<HTMLElement>('.map-canvas[data-map]');
+  const base = import.meta.env.BASE_URL;
+  // MapLibre can't parse oklch(): resolve a CSS colour token to rgb through a 1px canvas.
+  const css = (v: string) => {
+    const c = document.createElement('canvas').getContext('2d')!;
+    c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    c.fillRect(0, 0, 1, 1);
+    const [r, g, b] = c.getImageData(0, 0, 1, 1).data;
+    return `rgb(${r},${g},${b})`;
+  };
+  const io = new IntersectionObserver(async (entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      io.unobserve(e.target);
+      const el = e.target as HTMLElement;
+      const o = JSON.parse(el.dataset.map!);
+      if (!document.querySelector(`link[href="${cssUrl}"]`)) document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: cssUrl }));
+      const maplibregl = await import('maplibre-gl');
+      maplibregl.setWorkerUrl(workerUrl);
+      const map = new maplibregl.Map({
+        container: el,
+        // OpenFreeMap: free, no key, OpenStreetMap data. Attribution is added by the style.
+        style: 'https://tiles.openfreemap.org/styles/positron',
+        center: o.center, zoom: o.zoom ?? 8, cooperativeGestures: true, attributionControl: { compact: false },
+      });
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
+      map.on('load', async () => {
+        const data = await (await fetch(`${base}${o.data.replace(/^\//, '')}`)).json();
+        map.addSource('d', { type: 'geojson', data });
+        const teal = css('--teal'), index = css('--index');
+        map.addLayer({ id: 'fill', type: 'fill', source: 'd', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': teal, 'fill-opacity': 0.18 } });
+        map.addLayer({ id: 'line', type: 'line', source: 'd', filter: ['!=', ['geometry-type'], 'Point'], paint: { 'line-color': index, 'line-width': 2 } });
+        map.addLayer({ id: 'pt', type: 'circle', source: 'd', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-color': teal, 'circle-radius': 6, 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5 } });
+        for (const id of ['fill', 'line', 'pt']) {
+          map.on('click', id, (ev) => {
+            const p = ev.features?.[0]?.properties ?? {};
+            if (!p.name && !p.description) return;
+            const box = document.createElement('div');
+            if (p.name) box.append(Object.assign(document.createElement('strong'), { textContent: p.name }));
+            if (p.description) box.append(Object.assign(document.createElement('p'), { textContent: p.description }));
+            new maplibregl.Popup().setLngLat(ev.lngLat).setDOMContent(box).addTo(map);
+          });
+          map.on('mouseenter', id, () => (map.getCanvas().style.cursor = 'pointer'));
+          map.on('mouseleave', id, () => (map.getCanvas().style.cursor = ''));
+        }
+      });
+    }
+  }, { rootMargin: '200px' });
+  canvases.forEach((c) => io.observe(c));
+</script>

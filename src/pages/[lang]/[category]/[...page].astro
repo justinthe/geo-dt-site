@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Listing from '../../../components/Listing.astro';
+import { getItems, langs } from '../../../lib/content';
+import { categories } from '../../../config/site';
+
+export const getStaticPaths = (async ({ paginate }) =>
+  (await Promise.all(langs.map(async (lang) => {
+    const posts = await getItems('posts', lang);
+    return Object.keys(categories).flatMap((category) =>
+      paginate(posts.filter((p) => (p.entry.data as any).categories.includes(category)), { params: { lang, category }, props: { lang, category }, pageSize: 10 }));
+  }))).flat()) satisfies GetStaticPaths;
+const { lang, category, page } = Astro.props;
+---
+<Listing lang={lang} title={categories[category].name[lang]} intro={categories[category].description[lang]} path={category} nav={category} page={page} />

@@ -1,0 +1,17 @@
+---
+import { contours } from '../lib/contours';
+interface Props { seed: string; cols?: number; levels?: number; ratio?: number; class?: string; labels?: boolean }
+const { seed, cols = 60, levels = 14, ratio = 3, class: cls, labels = false } = Astro.props;
+const c = contours(seed, 120, 120 / ratio, cols, levels);
+const id = `ct-${seed.replace(/[^a-z0-9]/gi, '')}`;
+---
+<svg class:list={['contours', cls]} viewBox={`0 0 ${c.w} ${c.h}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <path class="c" d={c.plain} />
+  <path class="ci" d={c.index} />
+  {labels && c.labels.map((l, i) => (
+    <>
+      <path id={`${id}-${i}`} d={l.d} fill="none" />
+      <text class="elev"><textPath href={`#${id}-${i}`} startOffset="50%" text-anchor="middle">{l.text}</textPath></text>
+    </>
+  ))}
+</svg>

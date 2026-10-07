@@ -1,0 +1,195 @@
+---
+import '../styles/global.css';
+import { site, categories, languages, type Lang } from '../config/site';
+import { t, url, langs, getItems } from '../lib/content';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description: string;
+  /** Path (without language prefix) shared by every language version of this page. */
+  path: string;
+  /** Languages this page really exists in. Defaults to all. */
+  available?: Lang[];
+  image?: string;
+  type?: 'website' | 'article';
+  jsonld?: Record<string, unknown>;
+  noindex?: boolean;
+  nav?: string;
+}
+const { lang, title, description, path, available = langs, image, type = 'website', jsonld, noindex, nav } = Astro.props;
+const pageTitle = title ? `${title} · ${site.author}` : `${site.author} · ${t(lang, 'site.tagline')}`;
+const canonical = new URL(url(`${lang}/${path}`), Astro.site).href;
+const other = langs.find((l) => l !== lang)!;
+const switchHref = url(`${other}/${path}`);
+// Hovering (or tabbing into) a section shows its sheets, so readers can jump straight to one.
+const sheet = (i: Awaited<ReturnType<typeof getItems>>[number]) => ({ href: i.fallback ? i.readHref : i.href, num: i.sheet, title: i.entry.data.title });
+const projects = await getItems('projects', lang);
+const posts = await getItems('posts', lang);
+const navItems = [
+  { key: 'projects', href: url(`${lang}/projects`), label: t(lang, 'nav.projects'), menu: projects.map(sheet), all: t(lang, 'home.allProjects') },
+  ...Object.entries(categories).filter(([, c]) => c.nav).map(([slug, c]) => ({
+    key: slug, href: url(`${lang}/${slug}`), label: c.name[lang], all: `${t(lang, 'home.allIn')} ${c.name[lang]}`,
+    menu: posts.filter((p) => (p.entry.data as any).categories.includes(slug)).map(sheet),
+  })),
+  { key: 'about', href: url(`${lang}/about`), label: t(lang, 'nav.about'), menu: [], all: '' },
+];
+const ogImage = image && new URL(image, Astro.site).href;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {available.map((l) => <link rel="alternate" hreflang={l} href={new URL(url(`${l}/${path}`), Astro.site).href} />)}
+    {available.includes('en') && <link rel="alternate" hreflang="x-default" href={new URL(url(`en/${path}`), Astro.site).href} />}
+    <link rel="alternate" type="application/rss+xml" title={`${site.author} (${languages[lang]})`} href={url(`${lang}/feed.xml`).replace(/\/$/, '')} />
+    <link rel="icon" href={url('favicon.svg').replace(/\/$/, '')} type="image/svg+xml" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title ?? site.author} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'id' ? 'id_ID' : 'en_GB'} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
+    <script is:inline>
+      try { const s = localStorage.getItem('theme'); if (s) document.documentElement.dataset.theme = s; } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">{t(lang, 'nav.skip')}</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href={url(lang)}>
+          <span class="brand-name">{site.author}</span>
+          <span class="collar">{t(lang, 'site.tagline')}</span>
+        </a>
+        <div class="tools">
+          <button class="tool" type="button" data-search-open aria-label={t(lang, 'nav.search')} aria-keyshortcuts="/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></svg>
+          </button>
+          <a class="tool" href={switchHref} hreflang={other} lang={other} title={t(lang, 'lang.switch')} aria-label={t(lang, 'lang.switch')}>{t(lang, 'lang.short')}</a>
+          <button class="tool" type="button" data-theme-toggle aria-label={t(lang, 'theme.toggle')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" stroke="none" /></svg>
+          </button>
+        </div>
+        <nav class="nav collar" aria-label="Main">
+          {navItems.map((n) => (
+            <div class="nav-item">
+              <a href={n.href} aria-current={nav === n.key ? 'page' : undefined}>{n.label}</a>
+              {n.menu.length > 0 && (
+                <div class="nav-panel">
+                  <ul>
+                    {n.menu.map((m) => <li><a href={m.href}><span class="figure-num">{m.num}</span><span>{m.title}</span></a></li>)}
+                  </ul>
+                  <a class="nav-all" href={n.href}>{n.all} →</a>
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <main id="main"><slot /></main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <div>
+          <span class="collar">{site.author}</span>
+          <p>{t(lang, 'site.tagline')}.</p>
+        </div>
+        <ul>
+          <li><a href={site.links.github}>GitHub</a></li>
+          <li><a href={site.links.linkedin}>LinkedIn</a></li>
+          <li><a href={`mailto:${site.links.email}`}>{site.links.email}</a></li>
+          <li><a href={url(`${lang}/feed.xml`).replace(/\/$/, '')}>{t(lang, 'footer.rss')}</a></li>
+          <li><a href={switchHref} hreflang={other} lang={other}>{t(lang, 'lang.switch')}</a></li>
+        </ul>
+        <div>
+          <p>{t(lang, 'footer.license')}</p>
+          <p>{t(lang, 'footer.privacy')}</p>
+        </div>
+      </div>
+    </footer>
+
+    <dialog class="search" aria-label={t(lang, 'search.title')} data-base={url('')} data-none={t(lang, 'search.none')} data-unavailable={t(lang, 'search.unavailable')}>
+      <form method="dialog" role="search">
+        <label class="visually-hidden" for="q">{t(lang, 'search.title')}</label>
+        <input id="q" type="search" autocomplete="off" placeholder={t(lang, 'search.placeholder')} />
+        <button class="tool" value="close" aria-label={t(lang, 'search.close')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+      </form>
+      <ol aria-live="polite"></ol>
+    </dialog>
+
+    <script>
+      const root = document.documentElement;
+      document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        try { localStorage.setItem('theme', root.dataset.theme); } catch {}
+        window.dispatchEvent(new Event('themechange'));
+      });
+
+      // Section menus close on Escape (WCAG 1.4.13) and stay closed until the pointer or focus leaves.
+      document.querySelectorAll<HTMLElement>('.nav-item').forEach((item) => {
+        const reopen = () => delete item.dataset.closed;
+        item.addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape') return;
+          item.dataset.closed = '';
+          item.querySelector<HTMLAnchorElement>(':scope > a')?.focus();
+        });
+        item.addEventListener('pointerleave', reopen);
+        item.addEventListener('focusout', (e) => { if (!item.contains(e.relatedTarget as Node)) reopen(); });
+      });
+
+      // Search: Pagefind index built after `astro build`, scoped to the page language.
+      const dialog = document.querySelector<HTMLDialogElement>('dialog.search')!;
+      const input = dialog.querySelector('input')!;
+      const list = dialog.querySelector('ol')!;
+      let pagefind: any;
+      const status = (text: string) => { list.innerHTML = ''; const p = document.createElement('p'); p.className = 'status note'; p.textContent = text; list.append(p); };
+      const open = async () => {
+        dialog.showModal();
+        input.select();
+        if (!pagefind) {
+          try {
+            pagefind = await import(/* @vite-ignore */ `${dialog.dataset.base}pagefind/pagefind.js`);
+            await pagefind.options({ excerptLength: 22 });
+          } catch { status(dialog.dataset.unavailable!); }
+        }
+      };
+      document.querySelectorAll('[data-search-open]').forEach((b) => b.addEventListener('click', open));
+      document.addEventListener('keydown', (e) => {
+        const typing = (e.target as HTMLElement).closest('input, textarea, [contenteditable]');
+        if (e.key === '/' && !typing && !dialog.open) { e.preventDefault(); open(); }
+      });
+      let seq = 0;
+      input.addEventListener('input', async () => {
+        if (!pagefind) return;
+        const q = input.value.trim(), mine = ++seq;
+        if (!q) { list.innerHTML = ''; return; }
+        const res = await pagefind.debouncedSearch(q, {}, 200);
+        if (!res || mine !== seq) return;
+        const data = await Promise.all(res.results.slice(0, 8).map((r: any) => r.data()));
+        if (!data.length) { status(`${dialog.dataset.none} “${q}”`); return; }
+        list.innerHTML = '';
+        for (const d of data) {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${d.url}"><span class="collar"></span><span class="t"></span><span class="x"></span></a>`;
+          li.querySelector('.collar')!.textContent = d.meta.category ?? '';
+          li.querySelector('.t')!.textContent = d.meta.title;
+          li.querySelector('.x')!.innerHTML = d.excerpt; // Pagefind escapes content and adds <mark>
+          list.append(li);
+        }
+      });
+    </script>
+  </body>
+</html>

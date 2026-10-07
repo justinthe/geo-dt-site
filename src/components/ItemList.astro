@@ -1,0 +1,35 @@
+---
+import { Image } from 'astro:assets';
+import Contours from './Contours.astro';
+import { t, sectorName, categoryName, type Item } from '../lib/content';
+interface Props { items: Item[]; headingLevel?: 'h2' | 'h3' }
+const { items, headingLevel: H = 'h2' } = Astro.props;
+---
+<ul class="sheet-index">
+  {items.map((i) => {
+    const d = i.entry.data as any;
+    const facet = i.kind === 'projects'
+      ? [sectorName(d.sector, i.lang), d.location, d.year].filter(Boolean).join(' · ')
+      : (d.categories ?? []).map((c: string) => categoryName(c, i.lang)).join(' · ');
+    return (
+      <li class="sheet-row" data-key={i.key}>
+        <a class="row-link" href={i.fallback ? i.readHref : i.href} hreflang={i.fallback ? i.entry.data.lang : undefined}>
+          <span class:list={['row-thumb', { illus: d.coverIllustration }]}>
+            {d.cover
+              ? <Image src={d.cover} alt={d.coverIllustration ? t(i.lang, 'illustration') : ''} width={288} height={216} fit="cover" layout="fixed" />
+              : <Contours seed={i.key} cols={24} levels={9} ratio={4 / 3} />}
+            {d.coverIllustration && <span class="thumb-note" aria-hidden="true">{t(i.lang, 'illustration.short')}</span>}
+          </span>
+          <span class="row-sheet">{i.sheet}</span>
+          <span class="row-main">
+            <H class="row-title" style="margin:0">
+              {d.title}{i.fallback && <span class="badge" title={t(i.lang, 'translation.missing')}>{t(i.lang, 'translation.badge')}</span>}
+            </H>
+            <p class="row-summary">{d.outcome ?? d.summary}</p>
+            <span class="collar facet">{facet} · {i.minutes} {t(i.lang, 'meta.reading')}</span>
+          </span>
+        </a>
+      </li>
+    );
+  })}
+</ul>

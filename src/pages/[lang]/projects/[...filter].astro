@@ -1,0 +1,39 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ItemList from '../../../components/ItemList.astro';
+import { getItems, langs, t, url, sectorName } from '../../../lib/content';
+import { sectors } from '../../../config/site';
+
+export async function getStaticPaths() {
+  return (await Promise.all(langs.map(async (lang) => {
+    const all = await getItems('projects', lang);
+    // Only sectors with at least one case study get a filter (PRD "Project sectors").
+    const used = Object.keys(sectors).filter((s) => all.some((i) => (i.entry.data as any).sector === s));
+    return [undefined, ...used].map((sector) => ({
+      params: { lang, filter: sector && `sector/${sector}` },
+      props: { lang, sector, used, all, items: sector ? all.filter((i) => (i.entry.data as any).sector === sector) : all },
+    }));
+  }))).flat();
+}
+const { lang, sector, used, all, items } = Astro.props;
+const count = (s: string) => all.filter((i) => (i.entry.data as any).sector === s).length;
+---
+<Base lang={lang} title={sector ? `${sectorName(sector, lang)} · ${t(lang, 'nav.projects')}` : t(lang, 'nav.projects')} description={t(lang, 'list.projects.intro')} path={sector ? `projects/sector/${sector}` : 'projects'} nav="projects">
+  <div class="wrap">
+    <div class="sheet-collar collar">
+      <span>{t(lang, 'sheet')} <span class="figure-num">CS</span> · {t(lang, 'list.projects.title')}</span>
+      <span class="figure-num">{items.length} / {all.length}</span>
+    </div>
+    <div class="neatline listing">
+    <header class="page-head">
+      <h1>{sector ? sectorName(sector, lang) : t(lang, 'list.projects.title')}</h1>
+      <p>{t(lang, 'list.projects.intro')}</p>
+    </header>
+    <ul class="filters collar" aria-label={t(lang, 'meta.sector')}>
+      <li><a href={url(`${lang}/projects`)} aria-current={!sector ? 'page' : undefined}>{t(lang, 'list.all')} <span class="count">{all.length}</span></a></li>
+      {used.map((s) => <li><a href={url(`${lang}/projects/sector/${s}`)} aria-current={s === sector ? 'page' : undefined}>{sectorName(s, lang)} <span class="count">{count(s)}</span></a></li>)}
+    </ul>
+    <ItemList items={items} />
+    </div>
+  </div>
+</Base>

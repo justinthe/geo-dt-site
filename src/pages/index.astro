@@ -1,0 +1,15 @@
+---
+import { url } from '../lib/content';
+const to = url('en');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Justin The</title>
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+    <link rel="canonical" href={new URL(to, Astro.site).href} />
+    <meta name="robots" content="noindex" />
+  </head>
+  <body><a href={to}>Justin The: Digital transformation &amp; geospatial AI for Indonesia</a></body>
+</html>

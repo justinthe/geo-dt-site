@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T11:10:54.943069+00:00",
+  "title": "Design System: Justin The",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Map Paper",
+        "canonical": "oklch(0.972 0.007 125)",
+        "night": "oklch(0.2 0.018 205)",
+        "tonalRamp": [
+          "oklch(0.15 0.007 125)",
+          "oklch(0.27 0.007 125)",
+          "oklch(0.39 0.007 125)",
+          "oklch(0.51 0.007 125)",
+          "oklch(0.63 0.007 125)",
+          "oklch(0.75 0.007 125)",
+          "oklch(0.86 0.007 125)",
+          "oklch(0.95 0.007 125)"
+        ]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Paper Tint",
+        "canonical": "oklch(0.945 0.013 135)",
+        "night": "oklch(0.235 0.022 200)",
+        "tonalRamp": [
+          "oklch(0.15 0.013 135)",
+          "oklch(0.27 0.013 135)",
+          "oklch(0.39 0.013 135)",
+          "oklch(0.51 0.013 135)",
+          "oklch(0.63 0.013 135)",
+          "oklch(0.75 0.013 135)",
+          "oklch(0.86 0.013 135)",
+          "oklch(0.95 0.013 135)"
+        ]
+      },
+      "paper-3": {
+        "role": "neutral",
+        "displayName": "Paper Shade",
+        "canonical": "oklch(0.915 0.018 140)",
+        "night": "oklch(0.275 0.025 195)",
+        "tonalRamp": [
+          "oklch(0.15 0.018 140)",
+          "oklch(0.27 0.018 140)",
+          "oklch(0.39 0.018 140)",
+          "oklch(0.51 0.018 140)",
+          "oklch(0.63 0.018 140)",
+          "oklch(0.75 0.018 140)",
+          "oklch(0.86 0.018 140)",
+          "oklch(0.95 0.018 140)"
+        ]
+      },
+      "sea": {
+        "role": "neutral",
+        "displayName": "Sea Wash",
+        "canonical": "oklch(0.948 0.018 220)",
+        "night": "oklch(0.225 0.03 225)",
+        "tonalRamp": [
+          "oklch(0.15 0.018 220)",
+          "oklch(0.27 0.018 220)",
+          "oklch(0.39 0.018 220)",
+          "oklch(0.51 0.018 220)",
+          "oklch(0.63 0.018 220)",
+          "oklch(0.75 0.018 220)",
+          "oklch(0.86 0.018 220)",
+          "oklch(0.95 0.018 220)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Forest-Teal Ink",
+        "canonical": "oklch(0.29 0.045 200)",
+        "night": "oklch(0.93 0.014 150)",
+        "tonalRamp": [
+          "oklch(0.15 0.045 200)",
+          "oklch(0.27 0.045 200)",
+          "oklch(0.39 0.045 200)",
+          "oklch(0.51 0.045 200)",
+          "oklch(0.63 0.045 200)",
+          "oklch(0.75 0.045 200)",
+          "oklch(0.86 0.045 200)",
+          "oklch(0.95 0.045 200)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "oklch(0.38 0.04 200)",
+        "night": "oklch(0.84 0.018 160)",
+        "tonalRamp": [
+          "oklch(0.15 0.040 200)",
+          "oklch(0.27 0.040 200)",
+          "oklch(0.39 0.040 200)",
+          "oklch(0.51 0.040 200)",
+          "oklch(0.63 0.040 200)",
+          "oklch(0.75 0.040 200)",
+          "oklch(0.86 0.040 200)",
+          "oklch(0.95 0.040 200)"
+        ]
+      },
+      "teal": {
+        "role": "primary",
+        "displayName": "Survey Teal",
+        "canonical": "oklch(0.43 0.075 188)",
+        "night": "oklch(0.8 0.075 182)",
+        "tonalRamp": [
+          "oklch(0.15 0.075 188)",
+          "oklch(0.27 0.075 188)",
+          "oklch(0.39 0.075 188)",
+          "oklch(0.51 0.075 188)",
+          "oklch(0.63 0.075 188)",
+          "oklch(0.75 0.075 188)",
+          "oklch(0.86 0.075 188)",
+          "oklch(0.95 0.075 188)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Contour Line",
+        "canonical": "oklch(0.62 0.045 185)",
+        "night": "oklch(0.6 0.05 185)",
+        "tonalRamp": [
+          "oklch(0.15 0.045 185)",
+          "oklch(0.27 0.045 185)",
+          "oklch(0.39 0.045 185)",
+          "oklch(0.51 0.045 185)",
+          "oklch(0.63 0.045 185)",
+          "oklch(0.75 0.045 185)",
+          "oklch(0.86 0.045 185)",
+          "oklch(0.95 0.045 185)"
+        ]
+      },
+      "hair": {
+        "role": "neutral",
+        "displayName": "Hair Rule",
+        "canonical": "oklch(0.84 0.02 170)",
+        "night": "oklch(0.34 0.02 195)",
+        "tonalRamp": [
+          "oklch(0.15 0.020 170)",
+          "oklch(0.27 0.020 170)",
+          "oklch(0.39 0.020 170)",
+          "oklch(0.51 0.020 170)",
+          "oklch(0.63 0.020 170)",
+          "oklch(0.75 0.020 170)",
+          "oklch(0.86 0.020 170)",
+          "oklch(0.95 0.020 170)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Collar Grey",
+        "canonical": "oklch(0.47 0.02 205)",
+        "night": "oklch(0.72 0.016 190)",
+        "tonalRamp": [
+          "oklch(0.15 0.020 205)",
+          "oklch(0.27 0.020 205)",
+          "oklch(0.39 0.020 205)",
+          "oklch(0.51 0.020 205)",
+          "oklch(0.63 0.020 205)",
+          "oklch(0.75 0.020 205)",
+          "oklch(0.86 0.020 205)",
+          "oklch(0.95 0.020 205)"
+        ]
+      },
+      "index": {
+        "role": "secondary",
+        "displayName": "Terracotta Index",
+        "canonical": "oklch(0.6 0.135 45)",
+        "night": "oklch(0.72 0.13 52)",
+        "tonalRamp": [
+          "oklch(0.15 0.120 45)",
+          "oklch(0.27 0.120 45)",
+          "oklch(0.39 0.135 45)",
+          "oklch(0.51 0.135 45)",
+          "oklch(0.63 0.135 45)",
+          "oklch(0.75 0.135 45)",
+          "oklch(0.86 0.135 45)",
+          "oklch(0.95 0.120 45)"
+        ]
+      },
+      "index-ink": {
+        "role": "secondary",
+        "displayName": "Index Ink",
+        "canonical": "oklch(0.5 0.13 42)",
+        "night": "oklch(0.78 0.11 55)",
+        "tonalRamp": [
+          "oklch(0.15 0.120 42)",
+          "oklch(0.27 0.120 42)",
+          "oklch(0.39 0.130 42)",
+          "oklch(0.51 0.130 42)",
+          "oklch(0.63 0.130 42)",
+          "oklch(0.75 0.130 42)",
+          "oklch(0.86 0.130 42)",
+          "oklch(0.95 0.120 42)"
+        ]
+      },
+      "select": {
+        "role": "neutral",
+        "displayName": "Highlighter",
+        "canonical": "oklch(0.88 0.06 75)",
+        "night": "oklch(0.42 0.07 60)",
+        "tonalRamp": [
+          "oklch(0.15 0.060 75)",
+          "oklch(0.27 0.060 75)",
+          "oklch(0.39 0.060 75)",
+          "oklch(0.51 0.060 75)",
+          "oklch(0.63 0.060 75)",
+          "oklch(0.75 0.060 75)",
+          "oklch(0.86 0.060 75)",
+          "oklch(0.95 0.060 75)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Item, listing and home titles."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Prose h2 and home section heads."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sheet-index row titles, search hits."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading column at 68ch."
+      },
+      "label": {
+        "displayName": "Collar",
+        "purpose": "Condensed caps for collars, legends, labels, table heads."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Sheet numbers, coordinates, counts, graticule labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "dialog-lift",
+        "value": "0 1.5rem 3rem -1rem oklch(0.2 0.03 200 / 0.35)",
+        "purpose": "Search dialog only."
+      },
+      {
+        "name": "illustration-ground",
+        "value": "drop-shadow(0 1.25rem 1.5rem oklch(0.2 0.03 200 / 0.12))",
+        "purpose": "filter on transparent AI illustration covers only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All state transitions (0.2-0.3s colour, opacity, marker radius)."
+      },
+      {
+        "name": "survey",
+        "value": "clip-path inset 100% to 0, 1.6s, 0.15s delay",
+        "purpose": "Index contours and elevation labels draw in left to right; reduced-motion skips it."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs",
+        "value": "30rem"
+      },
+      {
+        "name": "glance-stack",
+        "value": "34rem"
+      },
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "row-sheet",
+        "value": "46rem"
+      },
+      {
+        "name": "md",
+        "value": "60rem"
+      },
+      {
+        "name": "lg",
+        "value": "68rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Rare, blunt action button (e.g. read the original language).",
+      "html": "<a class=\"ds-button\" href=\"#\">Read in English →</a>",
+      "css": ".ds-button{display:inline-flex;align-items:center;gap:.6rem;padding:.75rem 1.1rem;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font:650 .9rem/1 var(--font-sans);letter-spacing:.02em;text-decoration:none;transition:background .2s}.ds-button:hover{background:var(--teal);border-color:var(--teal)}.ds-button:focus-visible{outline:2px solid var(--index);outline-offset:3px}"
+    },
+    {
+      "name": "Tool Button",
+      "kind": "button",
+      "refersTo": "tool-button",
+      "description": "Header search / language / theme control.",
+      "html": "<button class=\"ds-tool\" aria-label=\"Search\"><svg viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4.5 4.5\"/></svg></button>",
+      "css": ".ds-tool{display:inline-grid;place-items:center;min-width:2.5rem;height:2.5rem;padding:0 .55rem;border:1px solid transparent;border-radius:2px;background:none;color:var(--ink);cursor:pointer}.ds-tool svg{width:1.15rem;height:1.15rem;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round}.ds-tool:hover{border-color:var(--hair);background:var(--paper-2)}.ds-tool:focus-visible{outline:2px solid var(--index);outline-offset:3px}"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "search-input",
+      "description": "Search dialog input, underlined in terracotta on focus.",
+      "html": "<form class=\"ds-search\"><input type=\"search\" placeholder=\"Search sheets\"></form>",
+      "css": ".ds-search{display:flex;border:1px solid var(--ink);background:var(--paper)}.ds-search input{flex:1;border:0;padding:1rem 1.1rem;background:transparent;color:var(--ink);font:400 1.1rem var(--font-sans)}.ds-search input:focus{outline:none}.ds-search input::placeholder{color:var(--muted)}.ds-search:focus-within{box-shadow:inset 0 -2px 0 var(--index)}"
+    },
+    {
+      "name": "Site Navigation",
+      "kind": "nav",
+      "description": "Collar-caps nav band between an ink and a hair rule.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">Projects</a><a href=\"#\">Geospatial AI</a><a href=\"#\">Digital Transformation</a><a href=\"#\">About</a></nav>",
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:.15rem 1.4rem;border-top:1px solid var(--ink);border-bottom:1px solid var(--hair);padding-block:.55rem;font:600 .75rem/1.4 var(--font-sans);font-variation-settings:'wdth' 72;letter-spacing:.08em;text-transform:uppercase}.ds-nav a{color:var(--ink-soft);text-decoration:none;padding-block:.2rem}.ds-nav a:hover{color:var(--ink)}.ds-nav a[aria-current]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--index)}"
+    },
+    {
+      "name": "Category Legend",
+      "kind": "chip",
+      "description": "Line-style swatches instead of colour chips.",
+      "html": "<ul class=\"ds-legend\"><li><a href=\"#\"><span class=\"ds-sw\"></span>Geospatial AI</a></li><li><a href=\"#\"><span class=\"ds-sw dt\"></span>Digital Transformation</a></li></ul>",
+      "css": ".ds-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;list-style:none;margin:0;padding:0;font:500 .875rem/1.3 var(--font-sans)}.ds-legend a{display:inline-flex;align-items:center;gap:.5rem;color:var(--ink);text-decoration:none}.ds-legend a:hover{color:var(--teal)}.ds-sw{display:inline-block;width:1.6rem;border-top:2px solid var(--teal)}.ds-sw.dt{border-top:2px dashed var(--index)}"
+    },
+    {
+      "name": "Sheet Index Row",
+      "kind": "card",
+      "refersTo": "sheet-row-title",
+      "description": "List row: thumbnail, mono sheet number, title, summary, facet. Replaces cards.",
+      "html": "<ul class=\"ds-index\"><li><a href=\"#\"><span class=\"ds-thumb\"><span class=\"ds-note\">AI illustration</span></span><span class=\"ds-num\">CS-03</span><span class=\"ds-main\"><span class=\"ds-t\">Nationwide Rice Productivity Assessment in One Month</span><span class=\"ds-s\">Satellite data and field sampling across every rice province.</span><span class=\"ds-f\">Agriculture · 6 min read</span></span></a></li></ul>",
+      "css": ".ds-index{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}.ds-index li{border-bottom:1px solid var(--hair)}.ds-index a{display:grid;grid-template-columns:9rem 4.5rem minmax(0,1fr);gap:1.5rem;padding:1.1rem 0;color:inherit;text-decoration:none}.ds-thumb{position:relative;aspect-ratio:4/3;border:1px solid var(--hair);background:var(--paper-2)}.ds-note{position:absolute;left:.35rem;bottom:.25rem;font:600 .6rem/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.ds-num{font:500 .85rem/1.3 var(--font-mono);color:var(--index-ink);padding-top:.2rem}.ds-main{display:grid;gap:.35rem}.ds-t{font:680 1.25rem/1.25 var(--font-sans);font-variation-settings:'wdth' 86;color:var(--ink);transition:color .2s var(--ease)}.ds-s{font:400 .97rem/1.5 var(--font-serif);color:var(--ink-soft)}.ds-f{font:550 .8rem/1.4 var(--font-sans);letter-spacing:.02em;color:var(--muted)}.ds-index a:hover .ds-t{color:var(--teal)}"
+    },
+    {
+      "name": "Neatline Sheet",
+      "kind": "custom",
+      "description": "Collar band above a framed sheet with graticule ticks.",
+      "html": "<div class=\"ds-collar\"><span>Sheet <b>CS-03</b> · Case study</span><b>6°12′S 106°49′E</b></div><div class=\"ds-neat\"><p>Map face</p></div>",
+      "css": ".ds-collar{display:flex;justify-content:space-between;padding:.7rem .15rem;font:600 .75rem/1.4 var(--font-sans);font-variation-settings:'wdth' 72;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.ds-collar b{font:500 .75rem var(--font-mono);color:var(--ink)}.ds-neat{position:relative;min-height:10rem;padding:2rem;border:1px solid var(--ink);outline:1px solid var(--hair);outline-offset:5px;background:var(--paper)}.ds-neat::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.55;background:repeating-linear-gradient(to right,var(--ink) 0 1px,transparent 1px 72px) top/100% 7px no-repeat,repeating-linear-gradient(to right,var(--ink) 0 1px,transparent 1px 72px) bottom/100% 7px no-repeat,repeating-linear-gradient(to bottom,var(--ink) 0 1px,transparent 1px 72px) left/7px 100% no-repeat,repeating-linear-gradient(to bottom,var(--ink) 0 1px,transparent 1px 72px) right/7px 100% no-repeat}"
+    },
+    {
+      "name": "Reading-Time Scale Bar",
+      "kind": "custom",
+      "description": "Ten segments, one per 2 minutes read.",
+      "html": "<span class=\"ds-scale\"><span class=\"ds-bar\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class=\"ds-cap\">6 min read</span></span>",
+      "css": ".ds-scale{display:inline-grid;gap:.25rem}.ds-bar{display:flex;height:.4rem;width:8.5rem;border:1px solid var(--ink)}.ds-bar i{flex:1;border-right:1px solid var(--ink)}.ds-bar i:last-child{border-right:0}.ds-bar i.on:nth-child(odd){background:var(--ink)}.ds-bar i.on:nth-child(even){background:var(--paper)}.ds-bar i:not(.on){background:repeating-linear-gradient(90deg,var(--hair) 0 1px,transparent 1px 3px)}.ds-cap{font:600 .75rem/1.4 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Map Sheet",
+    "overview": "Every page is one sheet in an Indonesian topographic map series. A sheet has a collar (sheet number, coordinates, legend, scale bar) printed in condensed caps outside a ruled neatline; inside the frame sits the map face: a contour masthead seeded from the page's slug, a title block, and a serif reading column. Listings are sheet indexes, rows in a ruled table, never a card grid. The home page is the series index map of Indonesia with hatched 2.5° index cells, numbered markers, a north arrow and a scale bar, and the list of sheets beside it.\n\nThe system is text-first, calm, and dense in the way printed cartography is dense: many hairline rules, few fills, one warm accent. Depth comes from rule weight (ink rule vs. hair rule), not from shadow. Cartographic furniture is functional, never ornament: the scale bar measures reading time, the legend links to categories, the sheet number is the item's ID, the coordinates are the project's first region.\n\nThe world carries a night-map dark theme (deep teal-slate paper, pale ink, brighter terracotta), switched by system preference or the header toggle. Every token has a night counterpart; nothing is hard-coded per theme.",
+    "keyCharacteristics": [
+      "Neatline frame (ink rule plus offset hair outline) with graticule ticks every 72px around every sheet and listing.",
+      "Collar band above each frame: sheet number left, coordinates or counts right, in condensed caps and mono figures.",
+      "Slug-seeded contour field: teal hairlines, a terracotta index contour every fifth level, elevation labels on index lines.",
+      "Archivo condensed for structure, Source Serif 4 for reading, JetBrains Mono for every figure and sheet number.",
+      "Square corners; ink and hair rules do the work cards and shadows do elsewhere."
+    ],
+    "rules": [
+      {
+        "name": "The Index Contour Rule",
+        "body": "Terracotta is the index line: it marks what is current, focused, lit, or numbered. It never fills a surface larger than a marker or a hatched cell.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Inks Rule",
+        "body": "Every divider is either ink (structural: frame, header, top of a list, table head) or hair (between peers). There is no third rule colour and no grey box fill standing in for a rule.",
+        "section": "colors"
+      },
+      {
+        "name": "The Night Map Rule",
+        "body": "Dark mode is a re-inked sheet, not an inverted one: every token is redefined under `[data-theme='dark']` and the system preference, so components only ever reference tokens.",
+        "section": "colors"
+      },
+      {
+        "name": "The Collar Voice Rule",
+        "body": "Uppercase condensed caps belong to the margin of the sheet (collar, legends, labels, table heads). Headings and body never go uppercase.",
+        "section": "typography"
+      },
+      {
+        "name": "The Numbers Are Mono Rule",
+        "body": "Any figure a map would print (sheet number, coordinate, count, scale value) is set in JetBrains Mono with tabular numerals.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ruled Not Raised Rule",
+        "body": "Containers are bordered, never shadowed. If a surface needs separating, give it an ink or hair rule or a `paper-2` ground.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** put every page's content inside a neatline frame with a collar band above it.",
+      "**Do** use terracotta only for index lines, current state, focus, lit markers and figures (The Index Contour Rule).",
+      "**Do** divide with ink rules for structure and hair rules between peers; use `paper-2` for the rare raised panel.",
+      "**Do** set sheet numbers, coordinates, counts and scale values in JetBrains Mono with tabular numerals.",
+      "**Do** generate a contour field from the slug wherever an item has no real image, rather than a stock or placeholder picture.",
+      "**Do** label every AI illustration as an illustration, on the thumbnail and on the cover.",
+      "**Do** define every new colour in both the light and night-map themes."
+    ],
+    "donts": [
+      "**Don't** lay items out as a card grid with rounded, shadowed cards; lists are ruled sheet-index rows.",
+      "**Don't** round corners beyond 2px or add shadows to containers (The Ruled Not Raised Rule).",
+      "**Don't** set headings or body in uppercase; caps are the collar's voice.",
+      "**Don't** add cartographic furniture that measures nothing: each scale bar, legend, coordinate or sheet number must carry real data.",
+      "**Don't** crop the index map on small screens; keep the full extent and enlarge markers instead."
+    ]
+  }
+}

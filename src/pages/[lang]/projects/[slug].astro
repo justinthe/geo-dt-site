@@ -1,0 +1,6 @@
+---
+import Sheet from '../../../layouts/Sheet.astro';
+import { itemPaths } from '../../../lib/paths';
+export const getStaticPaths = itemPaths('projects');
+---
+<Sheet {...Astro.props} />

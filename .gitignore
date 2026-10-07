@@ -1,0 +1,8 @@
+_private/
+node_modules/
+dist/
+.astro/
+src/content/generated/
+.recall/
+scripts/.shoot.tmp.mjs
+.impeccable/review/

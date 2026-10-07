@@ -1,0 +1,160 @@
+---
+import { render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from './Base.astro';
+import Contours from '../components/Contours.astro';
+import Comments from '../components/Comments.astro';
+import MapEmbed from '../components/MapEmbed.astro';
+import { series as seriesNames, site, type Lang } from '../config/site';
+import { t, url, translations, related, categoryName, sectorName, tagName, formatDate, type Item } from '../lib/content';
+
+interface Props { item: Item; pool: Item[] }
+const { item, pool } = Astro.props;
+const { lang, kind, key, entry } = item;
+const d = entry.data as any;
+const path = `${kind === 'pages' ? '' : kind}/${key}`;
+const available = await translations(kind, key);
+const { Content, headings } = await render(entry);
+
+const toc = headings.filter((h) => h.depth === 2);
+const showCover = d.cover && !(entry.body ?? '').includes(d.cover.src?.split('/').pop()?.split('?')[0] ?? '#');
+const og = d.cover ? (await getImage({ src: d.cover, width: 1200, format: 'jpg' })).src : undefined;
+
+const dms = (v: number, pos: string, neg: string) => {
+  const a = Math.abs(v), deg = Math.floor(a), min = Math.round((a - deg) * 60);
+  return `${deg}°${String(min).padStart(2, '0')}′${v < 0 ? neg : pos}`;
+};
+const coord = d.regions?.[0] && `${dms(d.regions[0].lat, 'N', 'S')} ${dms(d.regions[0].lon, 'E', 'W')}`;
+const sheetKind = kind === 'projects' ? t(lang, 'sheet.project') : kind === 'posts' ? t(lang, 'sheet.post') : null;
+const legend = kind === 'projects'
+  ? [{ href: url(`${lang}/projects/sector/${d.sector}`), label: sectorName(d.sector, lang), attr: { 'data-cat': 'geospatial-ai' } }]
+  : kind === 'posts'
+    ? [
+        ...d.categories.map((c: string) => ({ href: url(`${lang}/${c}`), label: categoryName(c, lang), attr: { 'data-cat': c } })),
+        ...d.tags.filter((x: string) => ['perspectives', 'lessons-learned'].includes(x)).map((x: string) => ({ href: url(`${lang}/tag/${x}`), label: tagName(x, lang), attr: { 'data-tag': x } })),
+      ]
+    : [];
+const SCALE = 10; // scale bar segments; one per 2 minutes, capped at 20 minutes
+const filled = Math.min(SCALE, Math.ceil(item.minutes / 2));
+
+const inSeries = d.series ? pool.filter((o) => (o.entry.data as any).series === d.series).sort((a, b) => (a.entry.data as any).seriesOrder - (b.entry.data as any).seriesOrder) : [];
+const at = inSeries.findIndex((o) => o.key === key);
+const prev = at > 0 ? inSeries[at - 1] : null;
+const next = at >= 0 && at < inSeries.length - 1 ? inSeries[at + 1] : null;
+const adjoining = kind === 'pages' ? [] : related(item, pool);
+
+const jsonld = kind === 'pages' ? undefined : {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: d.title,
+  description: d.summary,
+  inLanguage: entry.data.lang,
+  datePublished: item.date.toISOString(),
+  ...(d.updated && { dateModified: d.updated.toISOString() }),
+  author: { '@type': 'Person', name: site.author, url: site.links.linkedin },
+  ...(og && { image: new URL(og, Astro.site).href }),
+  mainEntityOfPage: new URL(url(`${lang}/${path}`), Astro.site).href,
+};
+---
+<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? 'projects' : kind === 'pages' ? key : d.categories?.[0]}>
+  <div class="wrap">
+    <div class="sheet-collar collar">
+      <span>{item.sheet ? <>{t(lang, 'sheet')} <span class="figure-num">{item.sheet}</span> · {sheetKind}</> : site.author}</span>
+      <span class="figure-num">{coord ?? (kind !== 'pages' && formatDate(item.date, lang))}</span>
+    </div>
+    <article class="neatline sheet" data-pagefind-body={item.fallback ? undefined : ''}>
+      <div class="masthead" data-pagefind-ignore>
+        <Contours seed={key} labels />
+      </div>
+
+      <header class:list={['title-block', { 'has-cover': showCover && !item.fallback }]}>
+        <div class="title-text">
+        <h1 data-pagefind-meta="title" data-pagefind-ignore="index" lang={item.fallback ? entry.data.lang : undefined}>{d.title}</h1>
+        {sheetKind && <span hidden data-pagefind-ignore="index" data-pagefind-meta="category">{sheetKind}</span>}
+        {!item.fallback && d.lede && <p class="lede">{d.lede}</p>}
+        {kind !== 'pages' && (
+          <div class="meta-row">
+            <span class="collar">{t(lang, 'meta.published')} <time datetime={item.date.toISOString()}>{formatDate(item.date, lang)}</time>{d.updated && <> · {t(lang, 'meta.updated')} <time datetime={d.updated.toISOString()}>{formatDate(d.updated, lang)}</time></>}</span>
+            <span class="scalebar" title={`${item.minutes} ${t(lang, 'meta.reading')}`}>
+              <span class="scalebar-bar" aria-hidden="true">{Array.from({ length: SCALE }, (_, i) => <i class={i < filled ? 'on' : undefined} />)}</span>
+              <span class="collar">{item.minutes} {t(lang, 'meta.reading')}</span>
+            </span>
+            <ul class="legend collar" aria-label={t(lang, 'meta.categories')}>
+              {legend.map((l: any) => <li><a href={l.href}><span class="swatch" {...l.attr} />{l.label}</a></li>)}
+            </ul>
+          </div>
+        )}
+        </div>
+        {showCover && !item.fallback && (
+          <figure class:list={['title-cover', { illus: d.coverIllustration }]}>
+            <Image src={d.cover} alt="" widths={[480, 720, 1080]} sizes="(min-width: 68rem) 40vw, 100vw" loading="eager" />
+            {d.coverIllustration && <figcaption class="collar">{t(lang, 'illustration')}</figcaption>}
+          </figure>
+        )}
+      </header>
+
+      {item.fallback ? (
+        <div class="stub">
+          <h2 class="collar">{t(lang, 'translation.missing')}</h2>
+          <p>{t(lang, 'translation.missing.body')}</p>
+          <a class="button" href={item.readHref} hreflang={entry.data.lang} lang={entry.data.lang}>{t(lang, 'translation.read')} →</a>
+        </div>
+      ) : (
+        <div class="sheet-body">
+          <aside class="margin" data-pagefind-ignore>
+            {toc.length >= 3 && (
+              <nav class="toc" aria-label={t(lang, 'toc')}>
+                <details open>
+                  <summary class="collar">{t(lang, 'toc')}</summary>
+                  <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+                </details>
+              </nav>
+            )}
+          </aside>
+          <div class="prose">
+            {d.glance?.length > 0 && (
+              <section class="glance" aria-labelledby="glance">
+                <h2 id="glance" class="collar">{t(lang, 'glance')}</h2>
+                <dl>{d.glance.map((g: any) => <><dt class="collar">{g.label}</dt><dd>{g.value}</dd></>)}</dl>
+              </section>
+            )}
+            <Content />
+
+            <div class="end-matter">
+              {inSeries.length > 1 && (
+                <nav aria-label={seriesNames[d.series]?.[lang] ?? d.series}>
+                  <p class="collar">{seriesNames[d.series]?.[lang]} · {t(lang, 'series.part')} {at + 1} {t(lang, 'series.of')} {inSeries.length}</p>
+                  <div class="series-nav">
+                    {prev ? <a href={prev.href}><span class="collar">← {t(lang, 'series.prev')}</span>{(prev.entry.data as any).title}</a> : <span />}
+                    {next ? <a class="next" href={next.href}><span class="collar">{t(lang, 'series.next')} →</span>{(next.entry.data as any).title}</a> : <span />}
+                  </div>
+                </nav>
+              )}
+              {adjoining.length > 0 && (
+                <nav aria-labelledby="adjoining">
+                  <h2 id="adjoining" class="collar" style="margin:0 0 .75rem">{t(lang, 'related')}</h2>
+                  <div class="adjoining">
+                    {adjoining.map((o) => <a href={o.fallback ? o.readHref : o.href}><span class="figure-num collar">{o.sheet ?? ''}</span><span class="t">{(o.entry.data as any).title}</span></a>)}
+                  </div>
+                </nav>
+              )}
+              {d.comments && kind !== 'pages' && <Comments lang={lang} term={key} />}
+              {d.map && <MapEmbed />}
+            </div>
+          </div>
+        </div>
+      )}
+    </article>
+  </div>
+  <script>
+    // Mark the section being read in the table of contents.
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+    if (links.length) {
+      const io = new IntersectionObserver((es) => {
+        for (const e of es) if (e.isIntersecting) links.forEach((a) => a.classList.toggle('on', a.hash === `#${e.target.id}`));
+      }, { rootMargin: '0px 0px -70% 0px' });
+      links.forEach((a) => { const h = document.getElementById(decodeURIComponent(a.hash.slice(1))); if (h) io.observe(h); });
+      if (matchMedia('(max-width: 67.99rem)').matches) links[0].closest('details')?.removeAttribute('open');
+    }
+  </script>
+</Base>

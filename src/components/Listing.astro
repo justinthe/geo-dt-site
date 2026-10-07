@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import ItemList from './ItemList.astro';
+import { t, type Item } from '../lib/content';
+import type { Lang } from '../config/site';
+interface Props { lang: Lang; title: string; intro?: string; path: string; nav?: string; page: { data: Item[]; total: number; currentPage: number; lastPage: number; url: { prev?: string; next?: string } } }
+const { lang, title, intro, path, nav, page } = Astro.props;
+---
+<Base lang={lang} title={page.currentPage > 1 ? `${title} (${t(lang, 'list.page')} ${page.currentPage})` : title} description={intro ?? title} path={path} nav={nav}>
+  <div class="wrap">
+    <div class="sheet-collar collar">
+      <span>{title}</span>
+      <span class="figure-num">{page.total} {t(lang, 'list.items')}</span>
+    </div>
+    <div class="neatline listing">
+    <header class="page-head">
+      <h1>{title}</h1>
+      {intro && <p>{intro}</p>}
+    </header>
+    {page.data.length ? <ItemList items={page.data} /> : <p class="note">{t(lang, 'list.empty')}</p>}
+    {page.lastPage > 1 && (
+      <nav class="pager collar" aria-label={t(lang, 'list.page')}>
+        {page.url.prev ? <a href={page.url.prev}>← {t(lang, 'list.newer')}</a> : <span />}
+        <span>{t(lang, 'list.page')} {page.currentPage} / {page.lastPage}</span>
+        {page.url.next ? <a href={page.url.next}>{t(lang, 'list.older')} →</a> : <span />}
+      </nav>
+    )}
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,87 @@
+---
+import map from '../assets/basemap.json';
+import { t, type Item } from '../lib/content';
+import type { Lang } from '../config/site';
+interface Props { lang: Lang; projects: Item[] }
+const { lang, projects } = Astro.props;
+const [LON0, LAT0] = map.bounds;
+const P = (lon: number, lat: number) => [(lon - LON0) * map.k, (LAT0 - lat) * map.k];
+const CELL = 2.5; // index cell size in degrees, like a sheet index
+const KM100 = (100 / 111.32) * map.k; // 100 km in map units (equirectangular, true at the equator)
+const marks = projects.flatMap((p) => ((p.entry.data as any).regions ?? []).map((r: any) => {
+  const [x, y] = P(r.lon, r.lat);
+  const [cx, cy] = P(Math.floor(r.lon / CELL) * CELL, Math.ceil(r.lat / CELL) * CELL);
+  return { p, r, x, y, cx, cy };
+}));
+const lons = Array.from({ length: 10 }, (_, i) => 95 + i * 5);
+const lats = [5, 0, -5, -10];
+const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 ? '' : v > 0 ? pos : neg}`;
+---
+<figure class="index-map">
+  <svg class="map-defs" width="0" height="0" aria-hidden="true">
+    <defs>
+      <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="5" class="hatch-line" />
+      </pattern>
+      <g id="land">
+        <rect class="sea" x="-34" y="-26" width={map.width + 68} height={map.height + 52} />
+        <path class="land-other" d={map.neighbours} />
+        <path class="land" d={map.indonesia} />
+        {lons.map((lon) => <line class="grat" x1={P(lon, 0)[0]} x2={P(lon, 0)[0]} y1="0" y2={map.height} />)}
+        {lats.map((lat) => <line class="grat" y1={P(0, lat)[1]} y2={P(0, lat)[1]} x1="0" x2={map.width} />)}
+        <rect class="frame" x="0" y="0" width={map.width} height={map.height} />
+        {lons.map((lon) => <text class="grat-label" x={P(lon, 0)[0]} y="-9" text-anchor="middle">{fmt(lon, 'E', 'W')}</text>)}
+        {lats.map((lat) => <text class="grat-label" x="-7" y={P(0, lat)[1] + 3.5} text-anchor="end">{fmt(lat, 'N', 'S')}</text>)}
+      </g>
+    </defs>
+  </svg>
+  <svg viewBox={`-34 -26 ${map.width + 68} ${map.height + 52}`} role="group" aria-label={t(lang, 'home.index')}>
+    <use href="#land" />
+    <g class="furniture" transform={`translate(18 ${map.height - 30})`}>
+      <path class="north" d="M8 -46 L13 -30 L8 -34 L3 -30 Z" />
+      <text class="grat-label" x="8" y="-49" text-anchor="middle">N</text>
+      {[0, 1, 2, 3, 4].map((i) => <rect class:list={['sb', { on: i % 2 === 0 }]} x={i * KM100} y="0" width={KM100} height="4" />)}
+      <text class="grat-label" x="0" y="15">0</text>
+      <text class="grat-label" x={5 * KM100} y="15" text-anchor="middle">500 km</text>
+    </g>
+    {marks.map((m) => <rect class="cell" data-key={m.p.key} x={m.cx} y={m.cy} width={CELL * map.k} height={CELL * map.k} />)}
+    {marks.map((m) => (
+      <a href={m.p.href} class="mark" data-key={m.p.key} aria-label={`${m.p.sheet} ${(m.p.entry.data as any).title} · ${m.r.name}`}>
+        <circle cx={m.x} cy={m.y} r="10" />
+        <text x={m.x} y={m.y + 3.6} text-anchor="middle">{m.p.entry.data.number}</text>
+      </a>
+    ))}
+  </svg>
+  <figcaption class="note">{t(lang, 'home.index.note')}</figcaption>
+</figure>
+
+<style>
+  .index-map { margin: 0; }
+  .map-defs { position: absolute; }
+  .index-map svg:not(.map-defs) { display: block; width: 100%; height: auto; }
+  /* On phones the whole archipelago stays in view; marks and furniture grow instead */
+  @media (max-width: 40rem) {
+    .mark circle { r: 19; stroke-width: 3; }
+    .mark text { font-size: 20px; transform: translateY(3.5px); transform-box: fill-box; }
+    .mark:hover circle, .mark:focus-visible circle, .mark.lit circle { r: 22; }
+    .furniture { transform: translate(18px, 300px) scale(1.8); }
+    .grat-label { font-size: 15px; }
+  }
+  .sea { fill: var(--sea); }
+  .land { fill: var(--paper); stroke: var(--ink); stroke-width: 0.6; stroke-linejoin: round; }
+  .land-other { fill: var(--paper-3); }
+  .grat { stroke: var(--line); stroke-width: 0.4; stroke-dasharray: 2 3; opacity: 0.7; }
+  .frame { fill: none; stroke: var(--ink); stroke-width: 0.8; }
+  .grat-label { font: 500 9px var(--font-mono); fill: var(--muted); }
+  .sb { fill: var(--paper); stroke: var(--ink); stroke-width: 0.6; }
+  .sb.on { fill: var(--ink); }
+  .north { fill: var(--ink); }
+  .hatch-line { stroke: var(--index); stroke-width: 1.2; }
+  .cell { fill: url(#hatch); stroke: var(--index); stroke-width: 0.8; opacity: 0.55; transition: opacity 0.3s var(--ease); }
+  .mark circle { fill: var(--ink); stroke: var(--paper); stroke-width: 2; transition: fill 0.2s var(--ease), r 0.3s var(--ease); }
+  .mark text { font: 700 10.5px var(--font-sans); fill: var(--paper); pointer-events: none; }
+  .mark:hover circle, .mark:focus-visible circle, .mark.lit circle { fill: var(--index); r: 13; }
+  .mark:focus-visible { outline: none; }
+  .cell.lit { opacity: 1; }
+  figcaption { margin-top: 0.6rem; }
+</style>

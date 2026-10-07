@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import Contours from '../components/Contours.astro';
+import { t, url } from '../lib/content';
+// One 404 for the whole site (GitHub Pages); the text switches to Bahasa Indonesia under /id/.
+const s = (k: string) => ({ 'data-en': t('en', k), 'data-id': t('id', k) });
+---
+<Base lang="en" title={t('en', 'notfound.title')} description={t('en', 'notfound.body')} path="" noindex>
+  <div class="wrap">
+    <div class="neatline" style="margin-top:1.5rem">
+      <div class="masthead"><Contours seed="404" /></div>
+      <div class="stub">
+        <h1 {...s('notfound.title')} style="margin:0;font-size:var(--step-4)">{t('en', 'notfound.title')}</h1>
+        <p {...s('notfound.body')}>{t('en', 'notfound.body')}</p>
+        <a class="button" href={url('en')} data-href-id={url('id')} {...s('notfound.home')}>{t('en', 'notfound.home')}</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    if (location.pathname.includes('/id/')) {
+      document.documentElement.lang = 'id';
+      document.querySelectorAll<HTMLElement>('[data-id]').forEach((el) => (el.textContent = el.dataset.id!));
+      document.querySelectorAll<HTMLAnchorElement>('[data-href-id]').forEach((a) => (a.href = a.dataset.hrefId!));
+    }
+  </script>
+</Base>

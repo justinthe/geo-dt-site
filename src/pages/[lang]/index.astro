@@ -1,0 +1,114 @@
+---
+import { readFileSync } from 'node:fs';
+import YAML from 'yaml';
+import Base from '../../layouts/Base.astro';
+import IndexMap from '../../components/IndexMap.astro';
+import ItemList from '../../components/ItemList.astro';
+import { getItems, langs, t, url, sectorName } from '../../lib/content';
+import { categories, type Lang } from '../../config/site';
+
+export const getStaticPaths = () => langs.map((lang) => ({ params: { lang } }));
+const lang = Astro.params.lang as Lang;
+const copy = YAML.parse(readFileSync(`content/site.${lang}.yaml`, 'utf8'));
+const projects = await getItems('projects', lang);
+const posts = await getItems('posts', lang);
+const entries = Object.entries(categories).filter(([, c]) => c.nav);
+---
+<Base lang={lang} description={copy.intro} path="" nav="home">
+  <div class="wrap home">
+    <header class="home-head">
+      <h1>{copy.title}</h1>
+      <p>{copy.intro}</p>
+    </header>
+
+    <div class="sheet-collar collar">
+      <span>{t(lang, 'sheet')} <span class="figure-num">IDX</span> · {t(lang, 'home.index')}</span>
+      <span class="figure-num">{projects.length} CS · {posts.length} A</span>
+    </div>
+    <section class="neatline home-index" aria-labelledby="index-h">
+      <h2 id="index-h" class="visually-hidden">{t(lang, 'home.index')}</h2>
+      <div class="index-main">
+        <IndexMap lang={lang} projects={projects} />
+          <dl class="map-legend">
+            <dt class="collar">{t(lang, 'home.legend')}</dt>
+            {entries.map(([slug, c]) => <dd><a href={`#${slug}`}><span class="swatch" data-cat={slug} />{c.name[lang]}</a></dd>)}
+            <dd><span class="hatch" aria-hidden="true" />{t(lang, 'home.legend.region')}</dd>
+            <dd><a href={url(`${lang}/projects`)}>{t(lang, 'home.allProjects')} →</a></dd>
+          </dl>
+      </div>
+      <aside class="index-side">
+        <ol class="index-legend">
+          {projects.map((p) => (
+            <li data-key={p.key}>
+              <a href={p.href}>
+                <span class="figure-num">{p.sheet}</span>
+                <span class="t">{(p.entry.data as any).title}</span>
+                <span class="collar">{sectorName((p.entry.data as any).sector, lang)}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </aside>
+    </section>
+
+    <section class="entries" aria-label={t(lang, 'home.entries')}>
+      {entries.map(([slug, c]) => (
+        <div class="entry" id={slug}>
+          <header>
+            <h2><span class="swatch" data-cat={slug} />{c.name[lang]}</h2>
+            <p>{c.description[lang]}</p>
+          </header>
+          <ItemList items={posts.filter((p) => (p.entry.data as any).categories[0] === slug).slice(0, 4)} headingLevel="h3" />
+          <p class="more"><a class="collar" href={url(`${lang}/${slug}`)}>{t(lang, 'home.allIn')} {c.name[lang]} →</a></p>
+        </div>
+      ))}
+    </section>
+  </div>
+</Base>
+
+<script>
+  // Linked highlight between the index map and the case-study legend.
+  const all = (key: string) => document.querySelectorAll(`[data-key="${CSS.escape(key)}"]`);
+  document.querySelectorAll<HTMLElement>('.home-index [data-key]').forEach((el) => {
+    const on = (v: boolean) => all(el.dataset.key!).forEach((n) => n.classList.toggle('lit', v));
+    for (const [evt, v] of [['pointerenter', true], ['pointerleave', false], ['focusin', true], ['focusout', false]] as const) el.addEventListener(evt, () => on(v));
+  });
+</script>
+
+<style>
+  .home-head { display: grid; gap: 1rem; padding: clamp(1.75rem, 4vw, 3rem) 0 clamp(1.5rem, 3vw, 2.25rem); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 60rem) { .home-head { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: end; gap: 3rem; } }
+  .home-head h1 { margin: 0; font-size: clamp(2.3rem, 1.3rem + 3.4vw, 4rem); font-variation-settings: 'wdth' 76; font-weight: 740; letter-spacing: -0.015em; word-spacing: 0.12em; line-height: 1.02; max-width: 18ch; }
+  .home-head p { margin: 0; font-size: var(--step-1); line-height: 1.5; color: var(--ink-soft); max-width: 44ch; }
+
+  .home-index { display: grid; gap: 1.5rem; padding: clamp(0.9rem, 2.5vw, 1.75rem); }
+  @media (min-width: 68rem) { .home-index { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 2rem; align-items: start; } }
+  .index-side { display: grid; gap: 1.25rem; align-content: start; }
+  .index-legend { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--ink); }
+  @media (min-width: 40rem) and (max-width: 67.99rem) { .index-legend { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2rem; } }
+  .index-legend a { display: grid; grid-template-columns: 3.4rem 1fr; gap: 0 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--hair); color: var(--ink); text-decoration: none; }
+  .index-legend .figure-num { grid-row: span 2; color: var(--index-ink); font-size: 0.85rem; padding-top: 0.1rem; }
+  .index-legend .t { font: 650 0.95rem/1.3 var(--font-sans); font-variation-settings: 'wdth' 86; transition: color 0.2s var(--ease); }
+  .index-legend li.lit .t, .index-legend a:hover .t { color: var(--teal); }
+  .index-legend li.lit .figure-num { color: var(--ink); }
+  .index-main { display: grid; gap: 1.25rem; align-content: start; }
+  .map-legend { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.85rem 1rem; border: 1px solid var(--ink); font: 500 0.875rem/1.3 var(--font-sans); }
+  .map-legend dt { color: var(--ink); }
+  .map-legend dd { margin: 0; display: flex; align-items: center; gap: 0.6rem; }
+  .map-legend a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 0.6rem; }
+  .map-legend a:hover { color: var(--teal); }
+  .hatch { width: 1.6rem; height: 0.9rem; border: 1px solid var(--index); background: repeating-linear-gradient(45deg, var(--index) 0 1px, transparent 1px 4px); opacity: 0.8; }
+  .more { margin: 1rem 0 0; text-align: right; }
+  .more a { color: var(--ink); text-decoration: none; }
+  .more a:hover { color: var(--teal); }
+
+  .entries { display: grid; gap: 3.5rem; margin-top: clamp(3.5rem, 8vw, 6rem); }
+  @media (min-width: 60rem) { .entries { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+  .entry header { display: grid; gap: 0.6rem; margin-bottom: 1.25rem; }
+  .entry h2 { margin: 0; font-size: var(--step-3); font-variation-settings: 'wdth' 80; display: flex; align-items: center; gap: 0.85rem; }
+  .entry h2 .swatch { width: 2.5rem; border-top-width: 3px; }
+  .entry header p { margin: 0; color: var(--ink-soft); max-width: 48ch; }
+  .entry :global(.sheet-row a.row-link) { grid-template-columns: 5.5rem minmax(0, 1fr); }
+  .entry :global(.row-sheet) { display: none; }
+  .entry :global(.row-title) { font-size: 1.125rem; }
+</style>
