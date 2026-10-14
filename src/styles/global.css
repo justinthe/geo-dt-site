@@ -441,7 +441,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .os-intro .os-more a:hover { color: var(--teal); }
 
 .os-cells { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--ink); border-left: 1px solid var(--hair); }
-@media (min-width: 46rem) { .os-cells { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 46rem) { .os-cells { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); } }
 .os-cells a { display: grid; gap: 0.45rem; align-content: start; height: 100%; padding: 0.75rem 0.75rem 0.9rem; border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); color: var(--ink); text-decoration: none; transition: background-color 0.2s var(--ease); }
 .os-cells a:hover { background: var(--paper-2); }
 .os-cells a:hover .t { color: var(--teal); }
