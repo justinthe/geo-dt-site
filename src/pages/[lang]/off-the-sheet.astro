@@ -1,0 +1,57 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { langs } from '../../lib/content';
+import { offSheet } from '../../lib/off-sheet';
+import type { Lang } from '../../config/site';
+
+export const getStaticPaths = () => langs.map((lang) => ({ params: { lang } }));
+const lang = Astro.params.lang as Lang;
+const { copy, groups, count } = offSheet(lang);
+---
+<Base lang={lang} title={copy.name} description={copy.lede.trim()} path="off-the-sheet" nav="off-the-sheet">
+  <div class="wrap">
+    <div class="sheet-collar collar"><span>{copy.collar}</span><span class="figure-num">{count}</span></div>
+    <article class="neatline draft os-page" data-pagefind-body>
+      <div class="os-title">
+        <h1>{copy.name}</h1>
+        <p class="lede">{copy.lede}</p>
+      </div>
+      <aside class="glance">
+        <h2 class="collar">{copy.glanceTitle}</h2>
+        <dl>
+          {copy.glance.map(([k, v]: string[]) => <><dt class="collar">{k}</dt><dd>{v}</dd></>)}
+        </dl>
+      </aside>
+      {groups.map((g: any) => (
+        <section class="os-group">
+          <header>
+            <h2><span class="swatch" data-dom={g.key} />{g.name}</h2>
+            <span class="collar facet">{g.note}</span>
+          </header>
+          <ul class="os-rows">
+            {g.items.map((i: any) => (
+              <li>
+                <a class="row" href={i.href} target="_blank" rel="noopener">
+                  <span class="num figure-num">{i.num}</span>
+                  <span class="shot-wrap"><Image class="shot" src={i.shot} alt="" widths={[480, 720]} sizes="(min-width: 46rem) 20rem, 100vw" loading="lazy" /></span>
+                  <span class="body">
+                    <h3>{i.title}</h3>
+                    <p>{i.desc}</p>
+                    <span class="go">
+                      <span class="collar facet">{i.stack}</span>
+                      <span class="url">justinthe.github.io/{i.key}
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
+                      </span>
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <p class="os-foot">{copy.foot}</p>
+    </article>
+  </div>
+</Base>
