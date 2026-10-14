@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { site, categories, languages, type Lang } from '../config/site';
 import { t, url, langs, getItems } from '../lib/content';
+import { offSheet } from '../lib/off-sheet';
 
 interface Props {
   lang: Lang;
@@ -32,6 +33,7 @@ const navItems = [
     key: slug, href: url(`${lang}/${slug}`), label: c.name[lang], all: `${t(lang, 'home.allIn')} ${c.name[lang]}`,
     menu: posts.filter((p) => (p.entry.data as any).categories.includes(slug)).map(sheet),
   })),
+  { key: 'off-the-sheet', href: url(`${lang}/off-the-sheet`), label: offSheet(lang).copy.name, menu: [], all: '' },
   { key: 'about', href: url(`${lang}/about`), label: t(lang, 'nav.about'), menu: [], all: '' },
 ];
 const ogImage = image && new URL(image, Astro.site).href;

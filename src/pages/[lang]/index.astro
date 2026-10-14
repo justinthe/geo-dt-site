@@ -4,6 +4,8 @@ import YAML from 'yaml';
 import Base from '../../layouts/Base.astro';
 import IndexMap from '../../components/IndexMap.astro';
 import ItemList from '../../components/ItemList.astro';
+import { Image } from 'astro:assets';
+import { offSheet } from '../../lib/off-sheet';
 import { getItems, langs, t, url, sectorName } from '../../lib/content';
 import { categories, type Lang } from '../../config/site';
 
@@ -13,6 +15,7 @@ const copy = YAML.parse(readFileSync(`content/site.${lang}.yaml`, 'utf8'));
 const projects = await getItems('projects', lang);
 const posts = await getItems('posts', lang);
 const entries = Object.entries(categories).filter(([, c]) => c.nav);
+const os = offSheet(lang);
 ---
 <Base lang={lang} description={copy.intro} path="" nav="home">
   <div class="wrap home">
@@ -62,6 +65,29 @@ const entries = Object.entries(categories).filter(([, c]) => c.nav);
           <p class="more"><a class="collar" href={url(`${lang}/${slug}`)}>{t(lang, 'home.allIn')} {c.name[lang]} →</a></p>
         </div>
       ))}
+    </section>
+
+    <section class="os-strip" aria-labelledby="os-h">
+      <div class="sheet-collar collar"><span>{os.copy.collar}</span><span class="figure-num">{os.count}</span></div>
+      <div class="neatline draft frame">
+        <div class="os-intro">
+          <h2 id="os-h">{os.copy.name}</h2>
+          <p>{os.copy.strip}</p>
+          <p class="os-more"><a class="collar" href={url(`${lang}/off-the-sheet`)}>{os.copy.all} →</a></p>
+        </div>
+        <ul class="os-cells">
+          {os.items.map((i: any) => (
+            <li>
+              <a href={i.href} target="_blank" rel="noopener">
+                <Image class="shot" src={i.shot} alt="" widths={[320, 480]} sizes="(min-width: 46rem) 14rem, 45vw" loading="lazy" />
+                <span class="figure-num">{i.num}</span>
+                <span class="t">{i.title}</span>
+                <span class="collar facet"><span class="swatch" data-dom={i.domain} />{os.groups.find((g: any) => g.key === i.domain).name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   </div>
 </Base>
