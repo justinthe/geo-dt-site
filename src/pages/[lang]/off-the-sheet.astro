@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import { langs } from '../../lib/content';
+import { langs, url } from '../../lib/content';
 import { offSheet } from '../../lib/off-sheet';
 import type { Lang } from '../../config/site';
 
@@ -51,7 +51,7 @@ const { copy, groups, count } = offSheet(lang);
           </ul>
         </section>
       ))}
-      <p class="os-foot">{copy.foot}</p>
+      <p class="os-foot"><a href={url(`${lang}/projects`)}>{copy.foot}</a></p>
     </article>
   </div>
 </Base>

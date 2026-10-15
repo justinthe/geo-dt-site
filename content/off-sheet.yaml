@@ -10,8 +10,8 @@ en:
     - [Status, 'Personal projects, built for fun. No client, no brief.']
     - [Expect, 'Rough edges. The 3D ones run best in a desktop browser.']
     - [Where, 'Each one is its own site on GitHub Pages and opens in a new tab.']
-  foot: Want the work that pays the bills? See Projects for case studies.
-  all: See all five
+  foot: Want the work that pays the bills? See the case studies.
+  all: See all {n}
   sketches: sketches
   domains: domains
 id:
@@ -24,8 +24,8 @@ id:
     - [Status, 'Proyek pribadi, dibuat untuk bersenang-senang. Tanpa klien, tanpa brief.']
     - [Catatan, 'Masih kasar. Yang 3D paling lancar di browser desktop.']
     - [Lokasi, 'Masing-masing situs sendiri di GitHub Pages, terbuka di tab baru.']
-  foot: Mencari pekerjaan profesional? Lihat Proyek untuk studi kasus.
-  all: Lihat kelimanya
+  foot: Mencari pekerjaan profesional? Lihat studi kasus.
+  all: Lihat semua {n}
   sketches: sketsa
   domains: bidang
 

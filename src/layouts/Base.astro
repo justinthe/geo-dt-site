@@ -33,7 +33,6 @@ const navItems = [
     key: slug, href: url(`${lang}/${slug}`), label: c.name[lang], all: `${t(lang, 'home.allIn')} ${c.name[lang]}`,
     menu: posts.filter((p) => (p.entry.data as any).categories.includes(slug)).map(sheet),
   })),
-  { key: 'off-the-sheet', href: url(`${lang}/off-the-sheet`), label: offSheet(lang).copy.name, menu: [], all: '' },
   { key: 'about', href: url(`${lang}/about`), label: t(lang, 'nav.about'), menu: [], all: '' },
 ];
 const ogImage = image && new URL(image, Astro.site).href;
@@ -110,6 +109,7 @@ const ogImage = image && new URL(image, Astro.site).href;
           <li><a href={site.links.github}>GitHub</a></li>
           <li><a href={site.links.linkedin}>LinkedIn</a></li>
           <li><a href={`mailto:${site.links.email}`}>{site.links.email}</a></li>
+          <li><a href={url(`${lang}/off-the-sheet`)}>{offSheet(lang).copy.name}</a></li>
           <li><a href={url(`${lang}/feed.xml`).replace(/\/$/, '')}>{t(lang, 'footer.rss')}</a></li>
           <li><a href={switchHref} hreflang={other} lang={other}>{t(lang, 'lang.switch')}</a></li>
         </ul>

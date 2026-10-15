@@ -175,6 +175,12 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .nav-panel .nav-all { display: block; margin: 0.4rem 1rem 0; padding-top: 0.55rem; border-top: 1px solid var(--hair); font-weight: 600; color: var(--ink); text-decoration: none; }
 .nav-panel .nav-all:hover { color: var(--teal); }
 .nav-item:last-child .nav-panel { left: auto; right: -1rem; }
+/* Narrow screens: anchor panels to the nav bar so they (even hidden) never extend past the viewport */
+@media (max-width: 40rem) {
+  .nav { position: relative; }
+  .nav-item { position: static; }
+  .nav-panel, .nav-item:last-child .nav-panel { left: 0; right: auto; width: 100%; }
+}
 .nav a[aria-current='page'], .nav a[aria-current='true'] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--index); }
 
 /* ── Footer ─────────────────────────────────────────── */
@@ -207,6 +213,11 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
   .title-block.has-cover .title-cover { margin-top: 0.6rem; }
 }
 .title-block h1 { font-size: var(--step-4); font-variation-settings: 'wdth' 82; font-weight: 720; margin: 0; max-width: 22ch; letter-spacing: -0.015em; word-spacing: 0.1em; }
+.outcome { display: grid; gap: 0.9rem 2rem; grid-template-columns: minmax(0, 1fr); padding-top: 1rem; border-top: 1px solid var(--hair); max-width: 60ch; }
+@media (min-width: 40rem) { .outcome:has(.fig) { grid-template-columns: max-content minmax(0, 1fr); } }
+.outcome p { margin: 0; display: grid; gap: 0.25rem; }
+.outcome .fig .figure-num { font-size: clamp(1.75rem, 1.3rem + 2vw, 2.75rem); font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--index-ink); }
+.outcome .what { font-size: 1.02rem; line-height: 1.45; }
 .lede { font-size: var(--step-1); line-height: 1.5; max-width: 60ch; margin: 0; color: var(--ink-soft); }
 .meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.75rem; }
 .legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; list-style: none; margin: 0; padding: 0; }
@@ -348,6 +359,15 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .row-thumb img, .row-thumb svg { width: 100%; height: 100%; object-fit: cover; display: block; }
 .row-thumb.illus img { object-fit: contain; padding: 0.35rem 0.35rem 1.1rem; }
 .thumb-note { position: absolute; left: 0.35rem; bottom: 0.25rem; font: 600 0.6rem/1 var(--font-sans); font-variation-settings: 'wdth' 72; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.row-proof { display: none; }
+@media (min-width: 46rem) {
+  .sheet-row a.row-link:has(.row-proof) { grid-template-columns: 9rem 4.5rem minmax(0, 1fr) 8rem; }
+  .row-proof { display: grid; gap: 0.3rem; align-content: start; justify-items: start; }
+  .row-proof .figure-num { font-size: 1.35rem; font-weight: 600; line-height: 1.1; color: var(--index-ink); }
+  .row-proof .collar { text-transform: none; letter-spacing: 0.02em; font-weight: 550; font-size: 0.78rem; }
+}
+.practice-cs { padding-bottom: 2.5rem; }
+.practice-cs h2 { margin: 0 0 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--ink); }
 .row-sheet { font: 500 0.85rem/1.3 var(--font-mono); color: var(--index-ink); padding-top: 0.2rem; }
 @media (max-width: 45.99rem) { .row-sheet { display: none; } }
 .collar.facet { text-transform: none; letter-spacing: 0.02em; font-weight: 550; font-size: 0.8rem; }
@@ -415,6 +435,29 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
   /* The index contours and their labels are surveyed in, left to right */
   .masthead .contours :is(.ci, .elev) { animation: survey 1.6s var(--ease) 0.15s backwards; }
   @keyframes survey { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+}
+
+/* ── Home: statement and proof strip ─────────────────── */
+.statement { font-family: var(--font-sans); font-weight: 740; font-variation-settings: 'wdth' 76; font-size: clamp(2.4rem, 1.2rem + 4.5vw, 5.2rem); line-height: 1.02; letter-spacing: -0.02em; margin: 0; max-width: 18ch; text-wrap: balance; color: var(--ink); }
+.proof-strip { list-style: none; margin: 2.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--hair); }
+.proof-strip li { border-left: 1px solid var(--hair); }
+.proof-strip li:first-child { border-left: 0; }
+.proof-strip a { display: grid; gap: 0.6rem; align-content: start; height: 100%; padding: 1rem 1rem 1.1rem; color: var(--ink); text-decoration: none; }
+.proof-strip li.lit, .proof-strip li:hover { background: var(--paper-2); }
+.proof-strip a:hover .collar:not(.sheet-id) { color: var(--teal); }
+.proof-strip .fig { font: 600 clamp(2rem, 1.4rem + 2.5vw, 3.25rem)/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--index-ink); overflow-wrap: anywhere; }
+.proof-strip .collar { text-transform: none; letter-spacing: 0.02em; font-weight: 550; font-size: 0.8rem; }
+.proof-strip .sheet-id { font-family: var(--font-mono); font-weight: 500; }
+@media (max-width: 30rem) { .proof-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } .proof-strip li:nth-child(odd) { border-left: 0; } }
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  /* Contours are drawn in, proof cells rise and map markers drop in one after another */
+  .statement-hero .contours path { stroke-dasharray: 6000; stroke-dashoffset: 6000; animation: draw 3.2s var(--ease) 0.2s forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .proof-strip li { animation: rise 0.7s var(--ease) both; animation-delay: calc(var(--i) * 120ms + 500ms); }
+  @keyframes rise { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+  .index-map .mark { animation: drop 0.6s var(--ease) both; animation-delay: calc(var(--i) * 90ms + 300ms); }
+  @keyframes drop { from { opacity: 0; translate: 0 -12px; } to { opacity: 1; translate: 0 0; } }
 }
 @media print {
   .site-head .tools, .nav, .toc, .comments-slot, .site-foot { display: none; }

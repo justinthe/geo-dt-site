@@ -25,6 +25,6 @@ export function offSheet(lang: Lang) {
     note: d.note[lang] as string,
     items: items.filter((i: any) => i.domain === d.key),
   }));
-  const copy = data[lang];
+  const copy = { ...data[lang], all: data[lang].all.replace('{n}', String(items.length)) }; // item count comes from the data
   return { copy, items, groups, count: `${items.length} ${copy.sketches} · ${groups.length} ${copy.domains}` };
 }

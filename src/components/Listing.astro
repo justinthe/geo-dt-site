@@ -17,6 +17,7 @@ const { lang, title, intro, path, nav, page } = Astro.props;
       <h1>{title}</h1>
       {intro && <p>{intro}</p>}
     </header>
+    {page.currentPage === 1 && <slot />}
     {page.data.length ? <ItemList items={page.data} /> : <p class="note">{t(lang, 'list.empty')}</p>}
     {page.lastPage > 1 && (
       <nav class="pager collar" aria-label={t(lang, 'list.page')}>

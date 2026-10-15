@@ -21,7 +21,7 @@ const count = (s: string) => all.filter((i) => (i.entry.data as any).sector === 
 <Base lang={lang} title={sector ? `${sectorName(sector, lang)} · ${t(lang, 'nav.projects')}` : t(lang, 'nav.projects')} description={t(lang, 'list.projects.intro')} path={sector ? `projects/sector/${sector}` : 'projects'} nav="projects">
   <div class="wrap">
     <div class="sheet-collar collar">
-      <span>{t(lang, 'sheet')} <span class="figure-num">CS</span> · {t(lang, 'list.projects.title')}</span>
+      <span>{t(lang, 'list.projects.title')}</span>
       <span class="figure-num">{items.length} / {all.length}</span>
     </div>
     <div class="neatline listing">

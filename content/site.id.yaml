@@ -1,5 +1,7 @@
 # Teks beranda (FR-46). Nama dan deskripsi kategori ada di src/config/site.ts.
-title: Transformasi digital & AI geospasial untuk Indonesia
+statement: Saya membangun sistem AI geospasial di Indonesia, dan membuat orang mau memakainya.
 intro: >-
   Studi kasus dan artikel dari lebih dari 20 tahun membangun sistem di Indonesia,
   dan membuat orang benar-benar memakainya. Metode, pelajaran apa adanya, dan apa yang tidak berhasil.
+# translationKey tiga bacaan "Mulai dari sini" (studi kasus atau artikel)
+start: [spatial-ai-in-practice, hydropower-four-site-feasibility, timesheet-app-adoption]

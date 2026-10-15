@@ -1,5 +1,7 @@
 # Homepage copy (FR-46). Category names and descriptions live in src/config/site.ts.
-title: Digital transformation & geospatial AI for Indonesia
+statement: I build geospatial AI systems in Indonesia, and get people to use them.
 intro: >-
   Case studies and articles from more than 20 years of building systems in Indonesia,
   and of getting people to use them. Methods, honest lessons, and what went wrong.
+# translationKeys of the three "Start here" reads (case studies or articles)
+start: [spatial-ai-in-practice, hydropower-four-site-feasibility, timesheet-app-adoption]

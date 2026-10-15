@@ -21,7 +21,8 @@ export const site = {
 
 type L = Record<Lang, string>;
 // Adding a category = one entry here (FR-29). `nav: false` makes it a tag-style listing only.
-export const categories: Record<string, { name: L; description: L; nav: boolean }> = {
+// `sectors` lists the case-study sectors shown on a category page; geospatial-ai shows every case study.
+export const categories: Record<string, { name: L; description: L; nav: boolean; sectors?: string[] }> = {
   'geospatial-ai': {
     name: { en: 'Geospatial AI', id: 'AI Geospasial' },
     description: {

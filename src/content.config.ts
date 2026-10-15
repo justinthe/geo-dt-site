@@ -43,6 +43,7 @@ const projects = defineCollection({
     methods: z.array(z.string()).default([]),
     outcome: z.string().nullish(),
     regions: z.array(z.object({ name: z.string(), lon: z.number(), lat: z.number() })).default([]),
+    proof: z.object({ value: z.string(), label: z.string(), quote: z.string() }).optional(),
     glance: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
   }),
 });

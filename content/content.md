@@ -292,6 +292,7 @@ flowchart LR
 title: "Multi-Source Monitoring of a 142 km High-Speed Railway Construction"
 lang: en
 translationKey: high-speed-railway-monitoring
+proof: { value: "142 km", label: "Railway corridor monitored", quote: "142 km Jakarta–Bandung high-speed railway corridor" }
 sector: infrastructure-construction
 secondarySectors: []
 client: "A railway construction consortium"
@@ -417,6 +418,7 @@ flowchart LR
 title: "Nationwide Rice Productivity Assessment in One Month"
 lang: en
 translationKey: national-rice-productivity
+proof: { value: "1 month", label: "National rice survey", quote: "within a one-month deadline" }
 sector: agriculture-food-security
 secondarySectors: []
 client: "A national government ministry"
@@ -551,6 +553,7 @@ For each of the four sites:
 title: "Hydropower Feasibility Studies Across Four Remote Sites"
 lang: en
 translationKey: hydropower-four-site-feasibility
+proof: { value: "4 of 4", label: "Hydropower sites built", quote: "Four out of four sites built." }
 sector: energy
 secondarySectors: []
 client: "A hydropower developer"
@@ -706,6 +709,7 @@ The whole system runs on open-source tools, so the client isn't tied to software
 title: "Landslide Early Warning System for Minihydro Power Plants"
 lang: en
 translationKey: landslide-early-warning-minihydro
+proof: { value: "Daily", label: "Landslide risk report", quote: "Every day it reports" }
 sector: energy
 secondarySectors: [environment-pollution]
 client: "An operator of multiple minihydro power plants"
@@ -1027,6 +1031,7 @@ The three source documents don't fully agree, so please settle these first:
 title: "Forecasting Belitung's Coastline: Sea-Level Rise, Mangroves, and Tin Mining"
 lang: en
 translationKey: belitung-coastline-forecast
+proof: { value: "34 years", label: "Of coastline change measured", quote: "over those 34 years" }
 sector: environment-pollution
 secondarySectors: [mining]
 tags: [coastal-change, climate, sea-level-rise, mangroves, google-earth-engine]

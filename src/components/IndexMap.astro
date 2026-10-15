@@ -13,6 +13,7 @@ const marks = projects.flatMap((p) => ((p.entry.data as any).regions ?? []).map(
   const [cx, cy] = P(Math.floor(r.lon / CELL) * CELL, Math.ceil(r.lat / CELL) * CELL);
   return { p, r, x, y, cx, cy };
 }));
+const unmapped = projects.filter((p) => !((p.entry.data as any).regions ?? []).length);
 const lons = Array.from({ length: 10 }, (_, i) => 95 + i * 5);
 const lats = [5, 0, -5, -10];
 const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 ? '' : v > 0 ? pos : neg}`;
@@ -45,14 +46,24 @@ const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 
       <text class="grat-label" x={5 * KM100} y="15" text-anchor="middle">500 km</text>
     </g>
     {marks.map((m) => <rect class="cell" data-key={m.p.key} x={m.cx} y={m.cy} width={CELL * map.k} height={CELL * map.k} />)}
-    {marks.map((m) => (
-      <a href={m.p.href} class="mark" data-key={m.p.key} aria-label={`${m.p.sheet} ${(m.p.entry.data as any).title} · ${m.r.name}`}>
+    {marks.map((m, n) => {
+      const proof = (m.p.entry.data as any).proof;
+      const label = `${m.p.sheet} ${(m.p.entry.data as any).title} · ${m.r.name}`;
+      const fig = proof && `${proof.value} ${proof.label.toLowerCase()}`;
+      return (
+      <a href={m.p.href} class="mark" data-key={m.p.key} style={`--i:${n}`} aria-label={fig ? `${label} · ${fig}` : label}>
+        <title>{fig ? `${label} — ${fig}` : label}</title>
         <circle cx={m.x} cy={m.y} r="10" />
         <text x={m.x} y={m.y + 3.6} text-anchor="middle">{m.p.entry.data.number}</text>
+        {fig && <text class="mk-fig" x={m.x} y={m.y - 17} text-anchor="middle">{fig}</text>}
       </a>
-    ))}
+      );
+    })}
   </svg>
-  <figcaption class="note">{t(lang, 'home.index.note')}</figcaption>
+  <figcaption class="note">
+    {t(lang, 'home.index.note')}
+    {unmapped.length > 0 && <> {t(lang, 'home.noRegion')} {unmapped.map((p) => p.sheet).join(', ')}.</>}
+  </figcaption>
 </figure>
 
 <style>
@@ -83,5 +94,9 @@ const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 
   .mark:hover circle, .mark:focus-visible circle, .mark.lit circle { fill: var(--index); r: 13; }
   .mark:focus-visible { outline: none; }
   .cell.lit { opacity: 1; }
+  .mk-fig { font: 600 11px var(--font-mono); fill: var(--index-ink); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; opacity: 0; pointer-events: none; transition: opacity 0.2s var(--ease); }
+  .mark:hover .mk-fig, .mark:focus-visible .mk-fig, .mark.lit .mk-fig { opacity: 1; }
+  .mark:focus-visible circle { stroke: var(--index); stroke-width: 3; }
+  @media (max-width: 40rem) { .mk-fig { font-size: 17px; stroke-width: 6px; transform: translateY(-6px); } }
   figcaption { margin-top: 0.6rem; }
 </style>
