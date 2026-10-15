@@ -175,6 +175,12 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .nav-panel .nav-all { display: block; margin: 0.4rem 1rem 0; padding-top: 0.55rem; border-top: 1px solid var(--hair); font-weight: 600; color: var(--ink); text-decoration: none; }
 .nav-panel .nav-all:hover { color: var(--teal); }
 .nav-item:last-child .nav-panel { left: auto; right: -1rem; }
+/* Narrow screens: anchor panels to the nav bar so they (even hidden) never extend past the viewport */
+@media (max-width: 40rem) {
+  .nav { position: relative; }
+  .nav-item { position: static; }
+  .nav-panel, .nav-item:last-child .nav-panel { left: 0; right: auto; width: 100%; }
+}
 .nav a[aria-current='page'], .nav a[aria-current='true'] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--index); }
 
 /* ── Footer ─────────────────────────────────────────── */
