@@ -27,13 +27,14 @@ const dms = (v: number, pos: string, neg: string) => {
 const coord = d.regions?.[0] && `${dms(d.regions[0].lat, 'N', 'S')} ${dms(d.regions[0].lon, 'E', 'W')}`;
 const sheetKind = kind === 'projects' ? t(lang, 'sheet.project') : kind === 'posts' ? t(lang, 'sheet.post') : null;
 const legend = kind === 'projects'
-  ? [{ href: url(`${lang}/projects/sector/${d.sector}`), label: sectorName(d.sector, lang), attr: { 'data-cat': 'geospatial-ai' } }]
+  ? [{ href: url(`${lang}/projects/sector/${d.sector}`), label: sectorName(d.sector, lang), attr: {} }]
   : kind === 'posts'
     ? [
         ...d.categories.map((c: string) => ({ href: url(`${lang}/${c}`), label: categoryName(c, lang), attr: { 'data-cat': c } })),
-        ...d.tags.filter((x: string) => ['perspectives', 'lessons-learned'].includes(x)).map((x: string) => ({ href: url(`${lang}/tag/${x}`), label: tagName(x, lang), attr: { 'data-tag': x } })),
+        ...d.tags.map((x: string) => ({ href: url(`${lang}/tag/${x}`), label: tagName(x, lang), attr: { 'data-tag': x } })),
       ]
     : [];
+const total = kind === 'projects' ? pool.filter((o) => o.kind === 'projects').length : 0;
 const SCALE = 10; // scale bar segments; one per 2 minutes, capped at 20 minutes
 const filled = Math.min(SCALE, Math.ceil(item.minutes / 2));
 
@@ -59,7 +60,7 @@ const jsonld = kind === 'pages' ? undefined : {
 <Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? 'projects' : kind === 'pages' ? key : d.categories?.[0]}>
   <div class="wrap">
     <div class="sheet-collar collar">
-      <span>{item.sheet ? <>{t(lang, 'sheet')} <span class="figure-num">{item.sheet}</span> · {sheetKind}</> : site.author}</span>
+      <span>{kind === 'projects' && d.number ? <>{sheetKind} <span class="figure-num">{d.number}</span> {t(lang, 'series.of')} <span class="figure-num">{total}</span></> : item.sheet ? <>{sheetKind} · <span class="figure-num">{item.sheet}</span></> : site.author}</span>
       <span class="figure-num">{coord ?? (kind !== 'pages' && formatDate(item.date, lang))}</span>
     </div>
     <article class="neatline sheet" data-pagefind-body={item.fallback ? undefined : ''}>
@@ -72,6 +73,12 @@ const jsonld = kind === 'pages' ? undefined : {
         <h1 data-pagefind-meta="title" data-pagefind-ignore="index" lang={item.fallback ? entry.data.lang : undefined}>{d.title}</h1>
         {sheetKind && <span hidden data-pagefind-ignore="index" data-pagefind-meta="category">{sheetKind}</span>}
         {!item.fallback && d.lede && <p class="lede">{d.lede}</p>}
+        {!item.fallback && (d.proof || d.outcome) && (
+          <div class="outcome">
+            {d.proof && <p class="fig"><span class="figure-num">{d.proof.value}</span><span class="collar">{d.proof.label}</span></p>}
+            {d.outcome && <p class="what"><span class="collar">{t(lang, 'outcome')}</span>{d.outcome}</p>}
+          </div>
+        )}
         {kind !== 'pages' && (
           <div class="meta-row">
             <span class="collar">{t(lang, 'meta.published')} <time datetime={item.date.toISOString()}>{formatDate(item.date, lang)}</time>{d.updated && <> · {t(lang, 'meta.updated')} <time datetime={d.updated.toISOString()}>{formatDate(d.updated, lang)}</time></>}</span>

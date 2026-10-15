@@ -21,6 +21,7 @@ const { items, headingLevel: H = 'h2' } = Astro.props;
             {d.coverIllustration && <span class="thumb-note" aria-hidden="true">{t(i.lang, 'illustration.short')}</span>}
           </span>
           <span class="row-sheet">{i.sheet}</span>
+          {i.kind === 'projects' && <span class="row-proof">{d.proof && <><span class="figure-num">{d.proof.value}</span><span class="collar">{d.proof.label}</span></>}</span>}
           <span class="row-main">
             <H class="row-title" style="margin:0">
               {d.title}{i.fallback && <span class="badge" title={t(i.lang, 'translation.missing')}>{t(i.lang, 'translation.badge')}</span>}

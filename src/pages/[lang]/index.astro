@@ -4,40 +4,57 @@ import YAML from 'yaml';
 import Base from '../../layouts/Base.astro';
 import IndexMap from '../../components/IndexMap.astro';
 import ItemList from '../../components/ItemList.astro';
+import Contours from '../../components/Contours.astro';
 import { Image } from 'astro:assets';
 import { offSheet } from '../../lib/off-sheet';
 import { getItems, langs, t, url, sectorName } from '../../lib/content';
-import { categories, type Lang } from '../../config/site';
+import { categories, site, type Lang } from '../../config/site';
 
 export const getStaticPaths = () => langs.map((lang) => ({ params: { lang } }));
 const lang = Astro.params.lang as Lang;
 const copy = YAML.parse(readFileSync(`content/site.${lang}.yaml`, 'utf8'));
 const projects = await getItems('projects', lang);
 const posts = await getItems('posts', lang);
+const proofs = projects.filter((p) => (p.entry.data as any).proof);
+const reads = (copy.start as string[]).map((k) => [...projects, ...posts].find((i) => i.key === k)!);
 const entries = Object.entries(categories).filter(([, c]) => c.nav);
 const os = offSheet(lang);
 ---
 <Base lang={lang} description={copy.intro} path="" nav="home">
   <div class="wrap home">
-    <header class="home-head">
-      <h1>{copy.title}</h1>
-      <p>{copy.intro}</p>
-    </header>
-
-    <div class="sheet-collar collar">
-      <span>{t(lang, 'sheet')} <span class="figure-num">IDX</span> · {t(lang, 'home.index')}</span>
-      <span class="figure-num">{projects.length} CS · {posts.length} A</span>
+    <div class="neatline home-frame">
+      <div class="sheet-collar collar">
+        <span>{site.author} · {projects.length} {t(lang, 'home.count.cs')} · {posts.length} {t(lang, 'home.count.a')}</span>
+      </div>
+      <section class="statement-hero">
+        <Contours seed="home" />
+        <p class="collar">{t(lang, 'site.tagline')}</p>
+        <h1 class="statement">{copy.statement}</h1>
+      </section>
+      <p class="home-intro">{copy.intro}</p>
     </div>
+
+    <ol class="proof-strip" aria-label={t(lang, 'home.proof')}>
+      {proofs.map((p, i) => (
+        <li data-key={p.key} style={`--i:${i}`}>
+          <a href={p.href}>
+            <span class="fig">{(p.entry.data as any).proof.value}</span>
+            <span class="collar">{(p.entry.data as any).proof.label}</span>
+            <span class="collar sheet-id">{p.sheet}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+
     <section class="neatline home-index" aria-labelledby="index-h">
-      <h2 id="index-h" class="visually-hidden">{t(lang, 'home.index')}</h2>
+      <h2 id="index-h" class="sec-title">{t(lang, 'home.where')}</h2>
       <div class="index-main">
         <IndexMap lang={lang} projects={projects} />
-          <dl class="map-legend">
-            <dt class="collar">{t(lang, 'home.legend')}</dt>
-            {entries.map(([slug, c]) => <dd><a href={`#${slug}`}><span class="swatch" data-cat={slug} />{c.name[lang]}</a></dd>)}
-            <dd><span class="hatch" aria-hidden="true" />{t(lang, 'home.legend.region')}</dd>
-            <dd><a href={url(`${lang}/projects`)}>{t(lang, 'home.allProjects')} →</a></dd>
-          </dl>
+        <dl class="map-legend">
+          <dt class="collar">{t(lang, 'home.legend')}</dt>
+          <dd><span class="hatch" aria-hidden="true" />{t(lang, 'home.legend.region')}</dd>
+          <dd><a href={url(`${lang}/projects`)}>{t(lang, 'home.allProjects')} →</a></dd>
+        </dl>
       </div>
       <aside class="index-side">
         <ol class="index-legend">
@@ -55,16 +72,30 @@ const os = offSheet(lang);
     </section>
 
     <section class="entries" aria-label={t(lang, 'home.entries')}>
+      <h2 class="visually-hidden">{t(lang, 'home.practices')}</h2>
       {entries.map(([slug, c]) => (
         <div class="entry" id={slug}>
           <header>
             <h2><span class="swatch" data-cat={slug} />{c.name[lang]}</h2>
             <p>{c.description[lang]}</p>
           </header>
-          <ItemList items={posts.filter((p) => (p.entry.data as any).categories[0] === slug).slice(0, 4)} headingLevel="h3" />
+          <ItemList items={posts.filter((p) => (p.entry.data as any).categories.includes(slug)).slice(0, 4)} headingLevel="h3" />
           <p class="more"><a class="collar" href={url(`${lang}/${slug}`)}>{t(lang, 'home.allIn')} {c.name[lang]} →</a></p>
         </div>
       ))}
+    </section>
+
+    <section class="start" aria-labelledby="start-h">
+      <h2 id="start-h" class="sec-title">{t(lang, 'home.start')}</h2>
+      <ul>
+        {reads.map((r) => (
+          <li>
+            <span class="collar">{r.kind === 'projects' ? t(lang, 'sheet.project') : t(lang, 'sheet.post')} · {r.sheet}</span>
+            <h3><a href={r.fallback ? r.readHref : r.href}>{(r.entry.data as any).title}</a></h3>
+            <p>{(r.entry.data as any).summary}</p>
+          </li>
+        ))}
+      </ul>
     </section>
 
     <section class="os-strip" aria-labelledby="os-h">
@@ -93,20 +124,23 @@ const os = offSheet(lang);
 </Base>
 
 <script>
-  // Linked highlight between the index map and the case-study legend.
+  // Linked highlight between the index map, the case-study legend and the proof strip.
   const all = (key: string) => document.querySelectorAll(`[data-key="${CSS.escape(key)}"]`);
-  document.querySelectorAll<HTMLElement>('.home-index [data-key]').forEach((el) => {
+  document.querySelectorAll<HTMLElement>('.home-index [data-key], .proof-strip [data-key]').forEach((el) => {
     const on = (v: boolean) => all(el.dataset.key!).forEach((n) => n.classList.toggle('lit', v));
     for (const [evt, v] of [['pointerenter', true], ['pointerleave', false], ['focusin', true], ['focusout', false]] as const) el.addEventListener(evt, () => on(v));
   });
 </script>
 
 <style>
-  .home-head { display: grid; gap: 1rem; padding: clamp(1.75rem, 4vw, 3rem) 0 clamp(1.5rem, 3vw, 2.25rem); grid-template-columns: minmax(0, 1fr); }
-  @media (min-width: 60rem) { .home-head { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: end; gap: 3rem; } }
-  .home-head h1 { margin: 0; font-size: clamp(2.3rem, 1.3rem + 3.4vw, 4rem); font-variation-settings: 'wdth' 76; font-weight: 740; letter-spacing: -0.015em; word-spacing: 0.12em; line-height: 1.02; max-width: 18ch; }
-  .home-head p { margin: 0; font-size: var(--step-1); line-height: 1.5; color: var(--ink-soft); max-width: 44ch; }
-
+  .home-frame { margin-top: 1.5rem; }
+  .home-frame .sheet-collar { padding: 0.7rem 1rem; border-bottom: 1px solid var(--hair); }
+  .statement-hero { position: relative; overflow: hidden; background: var(--paper-2); padding: clamp(2.5rem, 8vw, 6rem) clamp(1.1rem, 5vw, 4rem); min-height: clamp(18rem, 40vw, 30rem); display: grid; align-content: center; gap: 1.25rem; }
+  .statement-hero :global(.contours) { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.6; }
+  .statement-hero > :not(:global(.contours)) { position: relative; }
+  .home-intro { margin: 0; padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.1rem, 5vw, 4rem); border-top: 1px solid var(--hair); font-size: var(--step-1); line-height: 1.5; max-width: 62ch; color: var(--ink-soft); }
+  .sec-title { grid-column: 1 / -1; margin: 0; font-size: var(--step-3); font-variation-settings: 'wdth' 80; }
+  .home-index { margin-top: clamp(2.5rem, 6vw, 4.5rem); }
   .home-index { display: grid; gap: 1.5rem; padding: clamp(0.9rem, 2.5vw, 1.75rem); }
   @media (min-width: 68rem) { .home-index { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 2rem; align-items: start; } }
   .index-side { display: grid; gap: 1.25rem; align-content: start; }
@@ -127,6 +161,17 @@ const os = offSheet(lang);
   .more { margin: 1rem 0 0; text-align: right; }
   .more a { color: var(--ink); text-decoration: none; }
   .more a:hover { color: var(--teal); }
+
+  .start { margin-top: clamp(3.5rem, 8vw, 6rem); }
+  .start ul { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); border-top: 1px solid var(--ink); }
+  .start li { padding: 1.2rem 1.4rem 1.4rem 0; display: grid; align-content: start; gap: 0.5rem; }
+  .start li + li { padding-left: 1.4rem; border-left: 1px solid var(--hair); }
+  @media (max-width: 39.99rem) { .start li + li { padding-left: 0; border-left: 0; border-top: 1px solid var(--hair); } }
+  .start .collar { color: var(--index-ink); }
+  .start h3 { font-size: var(--step-1); margin: 0; }
+  .start h3 a { color: var(--ink); text-decoration: none; }
+  .start h3 a:hover { color: var(--teal); }
+  .start p { margin: 0; color: var(--ink-soft); font-size: 0.97rem; line-height: 1.5; }
 
   .entries { display: grid; gap: 3.5rem; margin-top: clamp(3.5rem, 8vw, 6rem); }
   @media (min-width: 60rem) { .entries { grid-template-columns: 1fr 1fr; gap: 3rem; } }
