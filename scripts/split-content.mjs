@@ -168,6 +168,8 @@ for (const file of files) {
         if (n.type === 'code' && n.lang === 'mermaid') n.value = n.value.replace(/^flowchart LR\b/m, 'flowchart TD');
       });
       body = body.flatMap((n) => diagramForms(n, where, meta));
+      // A proof figure must quote the case study verbatim, so a number can't be invented.
+      if (meta.proof && ![meta.lede, md.stringify({ type: 'root', children: body })].some((x) => x?.includes(meta.proof.quote))) log.errors.push(`${where}: proof.quote not found verbatim in the body: "${meta.proof.quote}"`);
       const dir = join(OUT, type, lang);
       const depthToRoot = relative(dir, ROOT) + '/';
       body.forEach((n) => rewriteImages(n, depthToRoot));
