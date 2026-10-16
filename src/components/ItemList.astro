@@ -9,7 +9,7 @@ const { items, headingLevel: H = 'h2' } = Astro.props;
   {items.map((i) => {
     const d = i.entry.data as any;
     const facet = i.kind === 'projects'
-      ? [sectorName(d.sector, i.lang), d.location, d.year].filter(Boolean).join(' · ')
+      ? [sectorName(d.sector, i.lang), d.year].filter(Boolean).join(' · ')
       : (d.categories ?? []).map((c: string) => categoryName(c, i.lang)).join(' · ');
     return (
       <li class="sheet-row" data-key={i.key}>
@@ -20,14 +20,13 @@ const { items, headingLevel: H = 'h2' } = Astro.props;
               : <Contours seed={i.key} cols={24} levels={9} ratio={4 / 3} />}
             {d.coverIllustration && <span class="thumb-note" aria-hidden="true">{t(i.lang, 'illustration.short')}</span>}
           </span>
-          <span class="row-sheet">{i.sheet}</span>
           {i.kind === 'projects' && <span class="row-proof">{d.proof && <><span class="figure-num">{d.proof.value}</span><span class="collar">{d.proof.label}</span></>}</span>}
           <span class="row-main">
             <H class="row-title" style="margin:0">
               {d.title}{i.fallback && <span class="badge" title={t(i.lang, 'translation.missing')}>{t(i.lang, 'translation.badge')}</span>}
             </H>
             <p class="row-summary">{d.outcome ?? d.summary}</p>
-            <span class="collar facet">{facet} · {i.minutes} {t(i.lang, 'meta.reading')}</span>
+            <span class="collar facet">{facet}{i.kind !== 'projects' && <> · {i.minutes} {t(i.lang, 'meta.reading')}</>}</span>
           </span>
         </a>
       </li>

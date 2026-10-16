@@ -34,7 +34,6 @@ const legend = kind === 'projects'
         ...d.tags.map((x: string) => ({ href: url(`${lang}/tag/${x}`), label: tagName(x, lang), attr: { 'data-tag': x } })),
       ]
     : [];
-const total = kind === 'projects' ? pool.filter((o) => o.kind === 'projects').length : 0;
 const SCALE = 10; // scale bar segments; one per 2 minutes, capped at 20 minutes
 const filled = Math.min(SCALE, Math.ceil(item.minutes / 2));
 
@@ -60,7 +59,7 @@ const jsonld = kind === 'pages' ? undefined : {
 <Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? 'projects' : kind === 'pages' ? key : d.categories?.[0]}>
   <div class="wrap">
     <div class="sheet-collar collar">
-      <span>{kind === 'projects' && d.number ? <>{sheetKind} <span class="figure-num">{d.number}</span> {t(lang, 'series.of')} <span class="figure-num">{total}</span></> : item.sheet ? <>{sheetKind} · <span class="figure-num">{item.sheet}</span></> : site.author}</span>
+      <span>{sheetKind ?? site.author}</span>
       <span class="figure-num">{coord ?? (kind !== 'pages' && formatDate(item.date, lang))}</span>
     </div>
     <article class="neatline sheet" data-pagefind-body={item.fallback ? undefined : ''}>
@@ -141,7 +140,7 @@ const jsonld = kind === 'pages' ? undefined : {
                 <nav aria-labelledby="adjoining">
                   <h2 id="adjoining" class="collar" style="margin:0 0 .75rem">{t(lang, 'related')}</h2>
                   <div class="adjoining">
-                    {adjoining.map((o) => <a href={o.fallback ? o.readHref : o.href}><span class="figure-num collar">{o.sheet ?? ''}</span><span class="t">{(o.entry.data as any).title}</span></a>)}
+                    {adjoining.map((o) => <a href={o.fallback ? o.readHref : o.href}><span class="t">{(o.entry.data as any).title}</span></a>)}
                   </div>
                 </nav>
               )}

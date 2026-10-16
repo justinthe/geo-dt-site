@@ -40,7 +40,6 @@ const os = offSheet(lang);
           <a href={p.href}>
             <span class="fig">{(p.entry.data as any).proof.value}</span>
             <span class="collar">{(p.entry.data as any).proof.label}</span>
-            <span class="collar sheet-id">{p.sheet}</span>
           </a>
         </li>
       ))}
@@ -61,7 +60,6 @@ const os = offSheet(lang);
           {projects.map((p) => (
             <li data-key={p.key}>
               <a href={p.href}>
-                <span class="figure-num">{p.sheet}</span>
                 <span class="t">{(p.entry.data as any).title}</span>
                 <span class="collar">{sectorName((p.entry.data as any).sector, lang)}</span>
               </a>
@@ -90,7 +88,7 @@ const os = offSheet(lang);
       <ul>
         {reads.map((r) => (
           <li>
-            <span class="collar">{r.kind === 'projects' ? t(lang, 'sheet.project') : t(lang, 'sheet.post')} · {r.sheet}</span>
+            <span class="collar">{r.kind === 'projects' ? t(lang, 'sheet.project') : t(lang, 'sheet.post')}</span>
             <h3><a href={r.fallback ? r.readHref : r.href}>{(r.entry.data as any).title}</a></h3>
             <p>{(r.entry.data as any).summary}</p>
           </li>
@@ -111,7 +109,6 @@ const os = offSheet(lang);
             <li>
               <a href={i.href} target="_blank" rel="noopener">
                 <Image class="shot" src={i.shot} alt="" widths={[320, 480]} sizes="(min-width: 46rem) 14rem, 45vw" loading="lazy" />
-                <span class="figure-num">{i.num}</span>
                 <span class="t">{i.title}</span>
                 <span class="collar facet"><span class="swatch" data-dom={i.domain} />{os.groups.find((g: any) => g.key === i.domain).name}</span>
               </a>
@@ -146,11 +143,9 @@ const os = offSheet(lang);
   .index-side { display: grid; gap: 1.25rem; align-content: start; }
   .index-legend { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--ink); }
   @media (min-width: 40rem) and (max-width: 67.99rem) { .index-legend { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2rem; } }
-  .index-legend a { display: grid; grid-template-columns: 3.4rem 1fr; gap: 0 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--hair); color: var(--ink); text-decoration: none; }
-  .index-legend .figure-num { grid-row: span 2; color: var(--index-ink); font-size: 0.85rem; padding-top: 0.1rem; }
+  .index-legend a { display: grid; grid-template-columns: 1fr; gap: 0 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--hair); color: var(--ink); text-decoration: none; }
   .index-legend .t { font: 650 0.95rem/1.3 var(--font-sans); font-variation-settings: 'wdth' 86; transition: color 0.2s var(--ease); }
   .index-legend li.lit .t, .index-legend a:hover .t { color: var(--teal); }
-  .index-legend li.lit .figure-num { color: var(--ink); }
   .index-main { display: grid; gap: 1.25rem; align-content: start; }
   .map-legend { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: 0.85rem 1rem; border: 1px solid var(--ink); font: 500 0.875rem/1.3 var(--font-sans); }
   .map-legend dt { color: var(--ink); }
@@ -180,6 +175,5 @@ const os = offSheet(lang);
   .entry h2 .swatch { width: 2.5rem; border-top-width: 3px; }
   .entry header p { margin: 0; color: var(--ink-soft); max-width: 48ch; }
   .entry :global(.sheet-row a.row-link) { grid-template-columns: 5.5rem minmax(0, 1fr); }
-  .entry :global(.row-sheet) { display: none; }
   .entry :global(.row-title) { font-size: 1.125rem; }
 </style>

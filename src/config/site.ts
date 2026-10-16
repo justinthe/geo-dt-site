@@ -26,7 +26,7 @@ export const categories: Record<string, { name: L; description: L; nav: boolean;
   'geospatial-ai': {
     name: { en: 'Geospatial AI', id: 'AI Geospasial' },
     description: {
-      en: 'How AI, satellite, drone, and spatial data are used in practice, and where the field is heading in Indonesia.',
+      en: 'How AI is used with satellite, drone, and other spatial data in Indonesia, and where the field is heading.',
       id: 'Bagaimana AI, satelit, drone, dan data spasial dipakai dalam praktik, dan ke mana arah bidang ini di Indonesia.',
     },
     nav: true,
@@ -34,7 +34,7 @@ export const categories: Record<string, { name: L; description: L; nav: boolean;
   'digital-transformation': {
     name: { en: 'Digital Transformation', id: 'Transformasi Digital' },
     description: {
-      en: 'How to implement systems and drive adoption, spatial or not: change management, data, dashboards, and emerging technology.',
+      en: 'Putting systems into organisations and getting people to use them, spatial or not: change management, data, dashboards, and new technology.',
       id: 'Cara menerapkan sistem dan mendorong adopsinya, spasial maupun bukan: manajemen perubahan, data, dasbor, dan teknologi baru.',
     },
     nav: true,

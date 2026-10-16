@@ -33,7 +33,6 @@ const { copy, groups, count } = offSheet(lang);
             {g.items.map((i: any) => (
               <li>
                 <a class="row" href={i.href} target="_blank" rel="noopener">
-                  <span class="num figure-num">{i.num}</span>
                   <span class="shot-wrap"><Image class="shot" src={i.shot} alt="" widths={[480, 720]} sizes="(min-width: 46rem) 20rem, 100vw" loading="lazy" /></span>
                   <span class="body">
                     <h3>{i.title}</h3>

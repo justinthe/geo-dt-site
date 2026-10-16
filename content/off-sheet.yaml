@@ -2,15 +2,15 @@
 # Screenshots: content/images/off-sheet/<key>.png (1440x900). Add a project = one entry under `items`.
 en:
   name: Off the Sheet
-  collar: Off-sheet · Personal projects
-  strip: 'Things I build for fun after hours. Not client work and not case studies: small experiments, some unfinished.'
-  lede: 'Personal projects I build for fun, outside client work. They are sketches, not survey sheets: unpolished, sometimes unfinished, and mostly about learning a tool or a subject.'
+  collar: Personal projects
+  strip: 'Things I build for fun after hours. Small experiments, some unfinished, none of it client work.'
+  lede: 'Personal projects I build for fun, outside client work. They are unpolished and sometimes unfinished, and mostly a way to learn a tool or a subject.'
   glanceTitle: About these
   glance:
     - [Status, 'Personal projects, built for fun. No client, no brief.']
     - [Expect, 'Rough edges. The 3D ones run best in a desktop browser.']
     - [Where, 'Each one is its own site on GitHub Pages and opens in a new tab.']
-  foot: Want the work that pays the bills? See the case studies.
+  foot: Looking for client work? See the case studies.
   all: See all {n}
   sketches: sketches
   domains: domains
@@ -33,7 +33,7 @@ id:
 domains:
   - key: geo
     name: { en: Geospatial, id: Geospasial }
-    note: { en: 'Maps and terrain, for the joy of it', id: 'Peta dan medan, sekadar hobi' }
+    note: { en: 'Maps and terrain', id: 'Peta dan medan, sekadar hobi' }
   - key: drone
     name: { en: Drones & autonomy, id: Drone & otonomi }
     note: { en: Simulations of things that fly, id: Simulasi benda yang terbang }
@@ -68,7 +68,7 @@ items:
     title: { en: Middle Kingdom Explorer, id: Middle Kingdom Explorer }
     stack: { en: Timeline · Map, id: Linimasa · Peta }
     desc:
-      en: 4,000 years of Chinese history as one scrolling timeline and a living map of shifting borders.
+      en: 4,000 years of Chinese history as one scrolling timeline and a map of shifting borders.
       id: 4.000 tahun sejarah Tiongkok dalam satu linimasa bergulir dan peta perbatasan yang hidup.
   - key: uav-mapping-101
     domain: explain
