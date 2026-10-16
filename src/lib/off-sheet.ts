@@ -9,10 +9,9 @@ const shot = (key: string) => shots[`/content/images/off-sheet/${key}.png`]?.def
 const data = YAML.parse(readFileSync('content/off-sheet.yaml', 'utf8'));
 
 export function offSheet(lang: Lang) {
-  const items = data.items.map((i: any, n: number) => ({
+  const items = data.items.map((i: any) => ({
     key: i.key as string,
     domain: i.domain as string,
-    num: `X-${String(n + 1).padStart(2, '0')}`,
     title: i.title[lang] as string,
     stack: i.stack[lang] as string,
     desc: i.desc[lang] as string,

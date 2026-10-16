@@ -24,7 +24,7 @@ const canonical = new URL(url(`${lang}/${path}`), Astro.site).href;
 const other = langs.find((l) => l !== lang)!;
 const switchHref = url(`${other}/${path}`);
 // Hovering (or tabbing into) a section shows its sheets, so readers can jump straight to one.
-const sheet = (i: Awaited<ReturnType<typeof getItems>>[number]) => ({ href: i.fallback ? i.readHref : i.href, num: i.sheet, title: i.entry.data.title });
+const sheet = (i: Awaited<ReturnType<typeof getItems>>[number]) => ({ href: i.fallback ? i.readHref : i.href, title: i.entry.data.title });
 const projects = await getItems('projects', lang);
 const posts = await getItems('posts', lang);
 const navItems = [
@@ -86,7 +86,7 @@ const ogImage = image && new URL(image, Astro.site).href;
               {n.menu.length > 0 && (
                 <div class="nav-panel">
                   <ul>
-                    {n.menu.map((m) => <li><a href={m.href}><span class="figure-num">{m.num}</span><span>{m.title}</span></a></li>)}
+                    {n.menu.map((m) => <li><a href={m.href}><span>{m.title}</span></a></li>)}
                   </ul>
                   <a class="nav-all" href={n.href}>{n.all} →</a>
                 </div>

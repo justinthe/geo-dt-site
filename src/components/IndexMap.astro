@@ -6,7 +6,7 @@ interface Props { lang: Lang; projects: Item[] }
 const { lang, projects } = Astro.props;
 const [LON0, LAT0] = map.bounds;
 const P = (lon: number, lat: number) => [(lon - LON0) * map.k, (LAT0 - lat) * map.k];
-const CELL = 2.5; // index cell size in degrees, like a sheet index
+const CELL = 2.5; // index cell size in degrees
 const KM100 = (100 / 111.32) * map.k; // 100 km in map units (equirectangular, true at the equator)
 const marks = projects.flatMap((p) => ((p.entry.data as any).regions ?? []).map((r: any) => {
   const [x, y] = P(r.lon, r.lat);
@@ -48,13 +48,12 @@ const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 
     {marks.map((m) => <rect class="cell" data-key={m.p.key} x={m.cx} y={m.cy} width={CELL * map.k} height={CELL * map.k} />)}
     {marks.map((m, n) => {
       const proof = (m.p.entry.data as any).proof;
-      const label = `${m.p.sheet} ${(m.p.entry.data as any).title} · ${m.r.name}`;
+      const label = `${(m.p.entry.data as any).title} · ${m.r.name}`;
       const fig = proof && `${proof.value} ${proof.label.toLowerCase()}`;
       return (
       <a href={m.p.href} class="mark" data-key={m.p.key} style={`--i:${n}`} aria-label={fig ? `${label} · ${fig}` : label}>
-        <title>{fig ? `${label} — ${fig}` : label}</title>
+        <title>{fig ? `${label} · ${fig}` : label}</title>
         <circle cx={m.x} cy={m.y} r="10" />
-        <text x={m.x} y={m.y + 3.6} text-anchor="middle">{m.p.entry.data.number}</text>
         {fig && <text class="mk-fig" x={m.x} y={m.y - 17} text-anchor="middle">{fig}</text>}
       </a>
       );
@@ -62,7 +61,7 @@ const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 
   </svg>
   <figcaption class="note">
     {t(lang, 'home.index.note')}
-    {unmapped.length > 0 && <> {t(lang, 'home.noRegion')} {unmapped.map((p) => p.sheet).join(', ')}.</>}
+    {unmapped.length > 0 && <> {t(lang, 'home.noRegion')} {unmapped.map((p) => (p.entry.data as any).title).join(', ')}.</>}
   </figcaption>
 </figure>
 

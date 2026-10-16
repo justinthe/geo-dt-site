@@ -2,30 +2,28 @@
 
 ## About
 
-I'm Justin The. I work where digital transformation meets geospatial AI, mostly in Indonesia, and I've spent more than 20 years helping organisations turn data into decisions they actually use.
+I'm Justin The. For more than 20 years I've built geospatial AI and digital systems, mostly in Indonesia, and then had to get the organisation's staff to use them.
 
-My path wasn't a straight line. I started as a network engineer, configuring routers. I became a systems developer, then a systems architect building mine management systems for multi-site mining operations. I spent five years as IT manager and director of an Indonesian EPC company, where I introduced its first digital tools, starting with a simple timesheet app that grew into an enterprise platform. Today I lead PT Eidara Matadata Presisi, a geospatial AI and data practice working with government ministries, state-owned enterprises, and infrastructure developers.
-
-That mix shapes how I work. I've built the systems, and I've also had to get people to use them.
+I started as a network engineer, configuring routers. Then I became a systems developer, and later a systems architect on mine management systems for multi-site mining operations. I spent five years as IT manager and then director at an Indonesian EPC company. I introduced its first digital tools there, starting with a simple timesheet app that grew into an enterprise platform. Today I lead PT Eidara Matadata Presisi, a geospatial AI and data practice. Our clients are government ministries, state-owned enterprises, and infrastructure developers.
 
 ### What I work on
 
-- **Geospatial AI:** drone, LiDAR, satellite, and IoT sensor data combined with machine learning, for construction monitoring, agriculture, energy, mining, and coastal change. Field sensors such as rain gauges and water-flow monitors are often what turn a one-off map into continuous monitoring.
-- **Digital transformation:** implementing systems in organisations that aren't used to them, and doing the slow work of adoption, data governance, and change.
+- Geospatial AI: I combine drone, LiDAR, satellite, and IoT sensor data with machine learning for construction monitoring, agriculture, energy, mining, and coastal change. Rain gauges and water-flow monitors often turn a one-off map into continuous monitoring.
+- Digital transformation: I put systems into organisations that haven't used them before. Most of the time goes on adoption, data governance, and managing the change.
 
-### What I believe
+### How I work
 
-- **Start from the problem, not the technology.** "We want blockchain" or "we need AI" is rarely the real requirement.
-- **The model is the smallest part.** Ground truth, local data, and human review decide whether spatial AI works.
-- **Adoption is the project.** Building the app is the easy part; getting it used is the work.
+- I start from the problem. When someone says "we want blockchain" or "we need AI", that's rarely the requirement.
+- In spatial AI the model is a small part of the result. Ground truth, local data, and human review count for more.
+- Building the app takes less time than getting people to use it.
 
 ### Why this site exists
 
-To share what I've learned, including what went wrong, with people doing similar work: geospatial practitioners, digital transformation leads, and students in Indonesia and beyond. Case studies show what was delivered; articles share the methods and lessons behind them. Everything is published in English and Bahasa Indonesia.
+I write for people doing similar work: geospatial practitioners, digital transformation leads, and students in Indonesia and elsewhere. That includes what went wrong. Case studies describe what we delivered, and articles cover the methods and lessons behind them. Everything is in English and Bahasa Indonesia.
 
-Client names are left out on purpose. The methods and lessons are what matter, and many of these projects involve sensitive data.
+I leave out client names, and many of these projects involve sensitive data, so I describe methods only.
 
-This isn't a sales page. If something here is useful to you, or you disagree with it, I'd like to hear from you in the comments or by [email](mailto:justin.the@gmail.com).
+If something here is useful, or you disagree with it, tell me in the comments or by [email](mailto:justin.the@gmail.com).
 
 ### Background
 
@@ -46,7 +44,7 @@ This isn't a sales page. If something here is useful to you, or you disagree wit
 title: "About"
 lang: en
 translationKey: about
-summary: "Justin The works where digital transformation meets geospatial AI in Indonesia, sharing methods and lessons from more than 20 years of building systems and getting them used."
+summary: "Justin The has built geospatial AI and digital systems in Indonesia for more than 20 years. This site shares the methods and lessons, including what went wrong."
 comments: false
 map: false
 draft: true

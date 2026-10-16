@@ -25,7 +25,6 @@ export interface Item {
   key: string;
   href: string; // the page in `lang` (a "not translated yet" stub when fallback)
   readHref: string; // where the text can actually be read
-  sheet: string | null;
   minutes: number;
   date: Date;
 }
@@ -42,13 +41,11 @@ export async function getItems(kind: Kind, lang: Lang): Promise<Item[]> {
     .map((key) => {
       const own = all.find((e) => e.data.translationKey === key && e.data.lang === lang);
       const entry = own ?? all.find((e) => e.data.translationKey === key && e.data.lang === defaultLang) ?? all.find((e) => e.data.translationKey === key)!;
-      const sheet = entry.data.number ? (kind === 'projects' ? `CS-${entry.data.number.padStart(2, '0')}` : entry.data.number) : null;
       return {
         kind, entry, lang, key,
         fallback: !own,
         href: itemPath(kind, lang, key),
         readHref: itemPath(kind, entry.data.lang as Lang, key),
-        sheet,
         minutes: Math.max(1, Math.round((entry.body ?? '').split(/\s+/).length / 220)),
         date: entry.data.published ?? site.launchDate,
       };
