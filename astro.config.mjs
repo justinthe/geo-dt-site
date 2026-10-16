@@ -21,7 +21,7 @@ export default defineConfig({
       useDarkModeMediaQuery: false,
       styleOverrides: { borderRadius: '0', codeFontFamily: 'var(--font-mono)', uiFontFamily: 'var(--font-sans)' },
     }),
-    sitemap({ i18n: { defaultLocale: 'en', locales: { en: 'en', id: 'id' } } }),
+    sitemap({ filter: (p) => !/\/projects\/(sector\/[^/]+\/)?$/.test(p) && p !== 'https://justinthe.github.io/geo-dt-site/', i18n: { defaultLocale: 'en', locales: { en: 'en', id: 'id' } } }),
   ],
   image: { layout: 'constrained' },
   markdown: {

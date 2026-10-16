@@ -3,21 +3,21 @@ import type { GetStaticPaths } from 'astro';
 import Listing from '../../../components/Listing.astro';
 import ItemList from '../../../components/ItemList.astro';
 import { getItems, langs, t } from '../../../lib/content';
-import { categories } from '../../../config/site';
+import { categories, caseStudyCategory } from '../../../config/site';
 
 export const getStaticPaths = (async ({ paginate }) =>
   (await Promise.all(langs.map(async (lang) => {
     const posts = await getItems('posts', lang);
     const projects = await getItems('projects', lang);
     return Object.keys(categories).flatMap((category) =>
-      paginate(posts.filter((p) => (p.entry.data as any).categories.includes(category)), { params: { lang, category }, props: { lang, category, projects: category === 'geospatial-ai' ? projects : projects.filter((p) => categories[category].sectors?.includes((p.entry.data as any).sector)) }, pageSize: 10 }));
+      paginate(posts.filter((p) => (p.entry.data as any).categories.includes(category)), { params: { lang, category }, props: { lang, category, projects: category === caseStudyCategory ? projects : [] }, pageSize: 10 }));
   }))).flat()) satisfies GetStaticPaths;
 const { lang, category, projects, page } = Astro.props;
 ---
-<Listing lang={lang} title={categories[category].name[lang]} intro={categories[category].description[lang]} path={category} nav={category} page={page}>
+<Listing lang={lang} title={categories[category].name[lang]} intro={categories[category].description[lang]} path={category} nav={category} page={page} extra={projects.length} listHeading={projects.length ? t(lang, 'list.practice.a') : undefined}>
   {projects.length > 0 && (
-    <section class="practice-cs" aria-labelledby="practice-cs">
-      <h2 id="practice-cs" class="collar">{t(lang, 'list.practice.cs')}</h2>
+    <section class="practice-cs" aria-labelledby="case-studies">
+      <h2 id="case-studies" class="collar">{t(lang, 'list.practice.cs')}</h2>
       <ItemList items={projects} headingLevel="h3" />
     </section>
   )}

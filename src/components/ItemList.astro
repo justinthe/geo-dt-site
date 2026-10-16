@@ -1,11 +1,12 @@
 ---
 import { Image } from 'astro:assets';
-import Contours from './Contours.astro';
+import Locator from './Locator.astro';
+import Motif from './Motif.astro';
 import { t, sectorName, categoryName, type Item } from '../lib/content';
-interface Props { items: Item[]; headingLevel?: 'h2' | 'h3' }
-const { items, headingLevel: H = 'h2' } = Astro.props;
+interface Props { items: Item[]; headingLevel?: 'h2' | 'h3'; thumbs?: boolean }
+const { items, headingLevel: H = 'h2', thumbs = true } = Astro.props;
 ---
-<ul class="sheet-index">
+<ul class:list={['sheet-index', { 'no-thumbs': !thumbs }]}>
   {items.map((i) => {
     const d = i.entry.data as any;
     const facet = i.kind === 'projects'
@@ -14,12 +15,13 @@ const { items, headingLevel: H = 'h2' } = Astro.props;
     return (
       <li class="sheet-row" data-key={i.key}>
         <a class="row-link" href={i.fallback ? i.readHref : i.href} hreflang={i.fallback ? i.entry.data.lang : undefined}>
-          <span class:list={['row-thumb', { illus: d.coverIllustration }]}>
+          {thumbs && <span class:list={['row-thumb', { illus: d.coverIllustration }]}>
             {d.cover
               ? <Image src={d.cover} alt={d.coverIllustration ? t(i.lang, 'illustration') : ''} width={288} height={216} fit="cover" layout="fixed" />
-              : <Contours seed={i.key} cols={24} levels={9} ratio={4 / 3} />}
+              : d.regions?.length ? <Locator regions={d.regions} />
+              : <Motif key={i.key} />}
             {d.coverIllustration && <span class="thumb-note" aria-hidden="true">{t(i.lang, 'illustration.short')}</span>}
-          </span>
+          </span>}
           {i.kind === 'projects' && <span class="row-proof">{d.proof && <><span class="figure-num">{d.proof.value}</span><span class="collar">{d.proof.label}</span></>}</span>}
           <span class="row-main">
             <H class="row-title" style="margin:0">

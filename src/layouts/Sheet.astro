@@ -2,10 +2,11 @@
 import { render } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Base from './Base.astro';
+import Locator from '../components/Locator.astro';
 import Contours from '../components/Contours.astro';
 import Comments from '../components/Comments.astro';
 import MapEmbed from '../components/MapEmbed.astro';
-import { series as seriesNames, site, type Lang } from '../config/site';
+import { series as seriesNames, site, caseStudyCategory, type Lang } from '../config/site';
 import { t, url, translations, related, categoryName, sectorName, tagName, formatDate, type Item } from '../lib/content';
 
 interface Props { item: Item; pool: Item[] }
@@ -27,7 +28,10 @@ const dms = (v: number, pos: string, neg: string) => {
 const coord = d.regions?.[0] && `${dms(d.regions[0].lat, 'N', 'S')} ${dms(d.regions[0].lon, 'E', 'W')}`;
 const sheetKind = kind === 'projects' ? t(lang, 'sheet.project') : kind === 'posts' ? t(lang, 'sheet.post') : null;
 const legend = kind === 'projects'
-  ? [{ href: url(`${lang}/projects/sector/${d.sector}`), label: sectorName(d.sector, lang), attr: {} }]
+  ? [
+      { href: url(`${lang}/${caseStudyCategory}`), label: categoryName(caseStudyCategory, lang), attr: { 'data-cat': caseStudyCategory } },
+      { label: sectorName(d.sector, lang), attr: {} },
+    ]
   : kind === 'posts'
     ? [
         ...d.categories.map((c: string) => ({ href: url(`${lang}/${c}`), label: categoryName(c, lang), attr: { 'data-cat': c } })),
@@ -56,7 +60,7 @@ const jsonld = kind === 'pages' ? undefined : {
   mainEntityOfPage: new URL(url(`${lang}/${path}`), Astro.site).href,
 };
 ---
-<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? 'projects' : kind === 'pages' ? key : d.categories?.[0]}>
+<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? caseStudyCategory : kind === 'pages' ? key : d.categories?.[0]}>
   <div class="wrap">
     <div class="sheet-collar collar">
       <span>{sheetKind ?? site.author}</span>
@@ -67,7 +71,7 @@ const jsonld = kind === 'pages' ? undefined : {
         <Contours seed={key} labels />
       </div>
 
-      <header class:list={['title-block', { 'has-cover': showCover && !item.fallback }]}>
+      <header class:list={['title-block', { 'has-cover': (showCover || d.regions?.length) && !item.fallback }]}>
         <div class="title-text">
         <h1 data-pagefind-meta="title" data-pagefind-ignore="index" lang={item.fallback ? entry.data.lang : undefined}>{d.title}</h1>
         {sheetKind && <span hidden data-pagefind-ignore="index" data-pagefind-meta="category">{sheetKind}</span>}
@@ -86,7 +90,7 @@ const jsonld = kind === 'pages' ? undefined : {
               <span class="collar">{item.minutes} {t(lang, 'meta.reading')}</span>
             </span>
             <ul class="legend collar" aria-label={t(lang, 'meta.categories')}>
-              {legend.map((l: any) => <li><a href={l.href}><span class="swatch" {...l.attr} />{l.label}</a></li>)}
+              {legend.map((l: any) => <li>{l.href ? <a href={l.href}><span class="swatch" {...l.attr} />{l.label}</a> : <span class="plain">{l.label}</span>}</li>)}
             </ul>
           </div>
         )}
@@ -95,6 +99,12 @@ const jsonld = kind === 'pages' ? undefined : {
           <figure class:list={['title-cover', { illus: d.coverIllustration }]}>
             <Image src={d.cover} alt="" widths={[480, 720, 1080]} sizes="(min-width: 68rem) 40vw, 100vw" loading="eager" />
             {d.coverIllustration && <figcaption class="collar">{t(lang, 'illustration')}</figcaption>}
+          </figure>
+        )}
+        {!showCover && d.regions?.length && !item.fallback && (
+          <figure class="title-cover">
+            <Locator regions={d.regions} labels />
+            <figcaption class="collar">{t(lang, 'locator')}</figcaption>
           </figure>
         )}
       </header>
