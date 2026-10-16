@@ -1,0 +1,15 @@
+---
+interface Props { to: string; lang: string; label: string }
+const { to, lang, label } = Astro.props;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <title>Justin The</title>
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+    <link rel="canonical" href={new URL(to, Astro.site).href} />
+    <meta name="robots" content="noindex" />
+  </head>
+  <body><a href={to}>{label}</a></body>
+</html>

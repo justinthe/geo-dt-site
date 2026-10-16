@@ -1,0 +1,50 @@
+---
+import Contours from './Contours.astro';
+interface Props { key: string }
+const { key } = Astro.props;
+// 120x90 diagrams. Classes: g grid, i ink, t teal, a terracotta (one focal element each), x label.
+const G = '<path class="g" d="M0 15H120M0 30H120M0 45H120M0 60H120M0 75H120M15 0V90M30 0V90M45 0V90M60 0V90M75 0V90M90 0V90M105 0V90"/>';
+const motifs: Record<string, string> = {
+  'timesheet-app-adoption': G +
+    '<path class="i d" d="M8 68H36"/><path class="t" d="M36 68L64 64C72 56 80 26 92 24H114"/>' +
+    '<g class="af"><circle cx="36" cy="68" r="2.6"/><circle cx="64" cy="64" r="2.6"/><circle cx="92" cy="24" r="2.6"/></g>' +
+    '<text class="x" x="64" y="80" text-anchor="middle">M3</text><text class="x" x="92" y="16" text-anchor="middle">M6</text>',
+  'kpi-dashboards-enterprise-app': G +
+    '<g class="i"><rect x="6" y="6" width="9" height="9"/><rect x="6" y="24" width="9" height="9"/><rect x="6" y="42" width="9" height="9"/><rect x="6" y="60" width="9" height="9"/><rect x="6" y="78" width="9" height="9"/></g>' +
+    '<path class="i" d="M15 10.5H26L35 42M15 28.5H26L34 43M15 46.5H33M15 64.5H26L34 47M15 82.5H26L35 49"/>' +
+    '<circle class="t f" cx="38" cy="45" r="5"/><path class="i" d="M43 45H50"/>' +
+    '<g class="t"><rect x="52" y="22" width="14" height="20"/><rect x="69" y="22" width="14" height="20"/><rect x="86" y="22" width="14" height="20"/><rect x="103" y="22" width="12" height="20"/><rect x="52" y="48" width="14" height="20"/><rect x="69" y="48" width="14" height="20"/><rect x="86" y="48" width="14" height="20"/><rect x="103" y="48" width="12" height="20"/></g>' +
+    '<path class="a" d="M71 64L75 58L78 61L81 53"/>',
+  'data-governance-practical-guide': G +
+    '<path class="i" d="M12 28H108"/><g class="t f"><circle cx="12" cy="28" r="4"/><circle cx="36" cy="28" r="4"/><circle cx="60" cy="28" r="4"/><circle cx="84" cy="28" r="4"/><circle cx="108" cy="28" r="4"/></g>' +
+    '<path class="a" d="M108 33V60H12V33"/><text class="x" x="12" y="78">capture</text>',
+  'spatial-ai-in-practice': G +
+    '<g class="i"><rect x="7" y="8" width="14" height="10"/><rect x="29" y="8" width="14" height="10"/><rect x="51" y="8" width="14" height="10"/><rect x="73" y="8" width="14" height="10"/><rect x="95" y="8" width="14" height="10"/><rect x="7" y="26" width="14" height="10"/><rect x="29" y="26" width="14" height="10"/><rect x="51" y="26" width="14" height="10"/><rect x="73" y="26" width="14" height="10"/><rect x="95" y="26" width="14" height="10"/><rect x="7" y="44" width="14" height="10"/><rect x="29" y="44" width="14" height="10"/><rect x="51" y="44" width="14" height="10"/><rect x="73" y="44" width="14" height="10"/><rect x="95" y="44" width="14" height="10"/></g>' +
+    '<g class="a"><rect x="48" y="23" width="20" height="16"/><rect x="26" y="41" width="20" height="16"/><rect x="92" y="5" width="20" height="16"/></g><text class="x" x="7" y="76">n=12</text>',
+  'generative-ai-small-team': G +
+    '<g class="i"><path d="M10 14H88M10 25H80M10 36H90M10 47H70M10 58H86M10 69H62"/></g>' +
+    '<g class="a"><path d="M8 36H92M40 62l4 -6l4 6M44 56V51"/><path d="M98 30H112M98 36H108M98 42H112"/></g>',
+  'blockchain-quantum-ai-needs': G +
+    '<g class="t"><path d="M22 4L28.5 10L22 16L15.5 10Z"/><path d="M22 22L28.5 28L22 34L15.5 28Z"/><path d="M22 40L28.5 46L22 52L15.5 46Z"/><path d="M22 58L28.5 64L22 70L15.5 64Z"/></g>' +
+    '<path class="i" d="M22 16V22M22 34V40M22 52V58M22 70V76M28.5 10H62M28.5 46H62M28.5 64H62"/>' +
+    '<g class="i"><rect x="62" y="5.5" width="46" height="9"/><rect x="62" y="41.5" width="46" height="9"/><rect x="62" y="59.5" width="46" height="9"/><rect x="10" y="76" width="24" height="9"/></g>' +
+    '<g class="a"><path d="M28.5 28H62"/><rect x="62" y="23.5" width="46" height="9"/></g><text class="x t2" x="85" y="29.8" text-anchor="middle">database</text>',
+};
+const svg = motifs[key];
+---
+{svg
+  ? <svg class="motif" viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" set:html={svg} />
+  : <Contours seed={key} cols={24} levels={9} ratio={4 / 3} />}
+<style is:global>
+  .motif { display: block; width: 100%; height: 100%; background: var(--paper-2); }
+  .motif * { vector-effect: non-scaling-stroke; fill: none; stroke-linejoin: round; }
+  .motif .g { stroke: var(--hair); stroke-width: 0.6; opacity: 0.7; }
+  .motif .i, .motif .i * { stroke: var(--ink-soft); stroke-width: 1.2; }
+  .motif .t, .motif .t * { stroke: var(--teal); stroke-width: 1.4; }
+  .motif .a, .motif .a * { stroke: var(--index); stroke-width: 1.6; }
+  .motif .d { stroke-dasharray: 3 2.5; }
+  .motif .f { fill: var(--paper-2); }
+  .motif .af, .motif .af * { fill: var(--index); stroke: var(--paper-2); stroke-width: 1; }
+  .motif .x { font: 600 6.5px var(--font-mono); fill: var(--muted); stroke: none; }
+  .motif .t2 { fill: var(--index-ink); font-size: 6px; }
+</style>

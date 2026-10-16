@@ -31,17 +31,17 @@ There are two primary audiences: geospatial practitioners and digital transforma
 
 | Audience | Who they are | What they need from the site | Content that serves them |
 | --- | --- | --- | --- |
-| Geospatial practitioners (primary) | GIS analysts, drone/LiDAR operators, remote sensing engineers, in Indonesia and abroad | Real methods, honest lessons, Indonesia-specific know-how | Projects, Geospatial AI |
-| Digital transformation practitioners (primary) | DT leads, IT managers, PMO and change managers in government, SOEs, and industry | Practical implementation methods, adoption and change tactics, honest lessons | Digital Transformation, Projects |
+| Geospatial practitioners (primary) | GIS analysts, drone/LiDAR operators, remote sensing engineers, in Indonesia and abroad | Real methods, honest lessons, Indonesia-specific know-how | Geospatial AI |
+| Digital transformation practitioners (primary) | DT leads, IT managers, PMO and change managers in government, SOEs, and industry | Practical implementation methods, adoption and change tactics, honest lessons | Digital Transformation, Geospatial AI |
 | Students and early-career professionals | Geography, geodesy, and computer science students; career switchers | Clear explanations, Bahasa-language material | Geospatial AI, Digital Transformation |
-| Government and programme decision-makers | Ministry, SOE, and agency staff commissioning geospatial or digital work | Plain-language value, proof of delivery, how to scope projects | Projects, Digital Transformation |
-| Industry peers and collaborators | Researchers, open-source maintainers, conference organisers | Evidence of expertise and opinions worth discussing | Projects, Perspectives tag |
+| Government and programme decision-makers | Ministry, SOE, and agency staff commissioning geospatial or digital work | Plain-language value, proof of delivery, how to scope projects | Geospatial AI, Digital Transformation |
+| Industry peers and collaborators | Researchers, open-source maintainers, conference organisers | Evidence of expertise and opinions worth discussing | Geospatial AI, Perspectives tag |
 
 **Bilingual rationale:** English reaches the global community and international collaborators. Bahasa Indonesia serves local practitioners and students, a group that global geospatial blogs rarely serve in depth.
 
 ## Information architecture
 
-The site has four sections under Home: Projects, Geospatial AI, Digital Transformation, and About. The three content sections map directly to what has been written: case studies go to Projects, and each article belongs to Geospatial AI, Digital Transformation, or both.
+The site has three sections under Home: Geospatial AI, Digital Transformation, and About. The two content sections map directly to what has been written: case studies go to Geospatial AI (listed before its articles), and each article belongs to Geospatial AI, Digital Transformation, or both.
 
 &#91;embedded content: site map · 3 content categories, 2 tags, 1 series\]
 
@@ -55,8 +55,7 @@ The site launches with three content categories, all in the main navigation, plu
 
 | Category | Definition | Current content | Shown as |
 | --- | --- | --- | --- |
-| Projects | Case studies of delivered work: context, approach, role, outcome, lessons | 7 case studies, filtered by sector | Nav category |
-| Geospatial AI | How AI, satellite, drone, and spatial data are used in practice, and where the field is heading in Indonesia | Spatial AI in Practice; One Map, Many Models; Data Governance (shared) | Nav category |
+| Geospatial AI | How AI, satellite, drone, and spatial data are used in practice, and where the field is heading in Indonesia | 7 case studies (context, approach, role, outcome, lessons); Spatial AI in Practice; One Map, Many Models; Data Governance (shared) | Nav category |
 | Digital Transformation | How to implement systems and drive adoption, spatial or not: change management, data, dashboards, and emerging technology | Timesheet app (Part 1); KPI dashboards (Part 2); Data Governance (shared); Spatial AI in Practice (shared); Generative AI; Blockchain, Quantum, and AI | Nav category |
 | Perspectives | Opinion pieces, clearly labelled as views | Blockchain, Quantum, and AI; One Map, Many Models | Tag |
 | Lessons Learned | Honest accounts of what went wrong and why | Timesheet app; Spatial AI in Practice; Generative AI | Tag |
@@ -65,7 +64,7 @@ Series, such as *Digitalising a Construction Company*, are set in each item's me
 
 ### Project sectors
 
-Case studies are filtered by sector within Projects. Only sectors with at least one case study are shown.
+Sector is a label on each case study, not a filter: there are no sector pages. The old `/projects/` and `/projects/sector/*` URLs redirect to `/geospatial-ai/`.
 
 | Sector | Case studies |
 | --- | --- |
@@ -96,7 +95,7 @@ The launch set is the content already drafted in `content.md`, plus three short 
 
 | Item | Type | At launch |
 | --- | --- | --- |
-| Case studies | Projects | 7 (drafted) |
+| Case studies | Geospatial AI | 7 (drafted) |
 | Articles | Geospatial AI and Digital Transformation | 7 (drafted) |
 | About, Now, Contact | Personal pages | 3 (to write) |
 | Resources pages | Data Directory, Glossary, Tools & Code, Reading List | Deferred until after launch |
@@ -174,7 +173,7 @@ Launch features are bilingual content, search, comments, interactive maps, and R
 
 | ID | Requirement | Priority | Acceptance criteria |
 | --- | --- | --- | --- |
-| FR-21 | Header navigation | Must | Home, Projects, Geospatial AI, Digital Transformation, About, search, language switcher |
+| FR-21 | Header navigation | Must | Home, Geospatial AI (case studies and articles), Digital Transformation, About, search, language switcher |
 | FR-22 | Category and tag archive pages | Must | Every category and tag has a paginated listing page |
 | FR-23 | Post template | Must | Title, date, updated date, one or more categories, tags, reading time, table of contents for long posts, related posts |
 | FR-24 | Case study template | Must | Structured fields: client (or anonymised label), sector, location, year, role, methods and tools, outcome, lessons |
@@ -288,7 +287,7 @@ The current working file already follows this format, so it can be used as-is:
 
 - **Case studies** render with the at-a-glance table as a summary card, then the remaining sections in order.
 - **Articles** render as long-form reading pages with a table of contents for long pieces.
-- **The home page, category and sector lists, series navigation, and related items** are generated from the metadata (`featured`, categories, sector, series, tags), never maintained by hand.
+- **The home page, category lists, series navigation, and related items** are generated from the metadata (`featured`, categories, sector, series, tags), never maintained by hand.
 
 #### Requirements
 
@@ -381,7 +380,7 @@ Adding a new category, content type, or page section must take a config entry an
 | FR-31 | Post URLs independent of category | Must | Posts live at `/en/posts/<slug>` and `/id/posts/<slug>`, so recategorising or promoting a tag never changes a URL |
 | FR-32 | New content types via content collections | Should | Each type = a schema, a layout, and a listing page; existing types are untouched |
 | FR-33 | Optional fields reserved in the schema now | Should | `author`, `series`, `seriesOrder`, `video`, `downloads` exist as optional fields from launch, avoiding later migrations |
-| FR-34 | Redirects for moved or renamed pages | Should | Static redirect pages generated at build time, since GitHub Pages has no server-side redirects (verify the exact mechanism in Astro's docs) |
+| FR-34 | Redirects for moved or renamed pages | Should | Static redirect pages generated at build time, since GitHub Pages has no server-side redirects (verify the exact mechanism in Astro's docs). Implemented as stub pages via `components/Redirect.astro` |
 | FR-35 | Languages not hard-coded to two | Could | Language list lives in config, so a third language could be added later |
 
 ### Candidate future content

@@ -1,0 +1,77 @@
+---
+import map from '../assets/basemap.json';
+interface Props { regions: { name: string; lon: number; lat: number }[]; labels?: boolean }
+const { regions, labels = false } = Astro.props;
+const [LON0, LAT0] = map.bounds;
+const P = (lon: number, lat: number) => [(lon - LON0) * map.k, (LAT0 - lat) * map.k];
+const CELL = 2.5;
+const PAD = 2 * map.k;
+
+const pts = regions.map((r) => P(r.lon, r.lat));
+const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+let w = Math.max(Math.max(...xs) - Math.min(...xs) + 2 * PAD, 1);
+let h = Math.max(Math.max(...ys) - Math.min(...ys) + 2 * PAD, 1);
+if (w / h < 4 / 3) w = (h * 4) / 3; else h = (w * 3) / 4;
+w = Math.min(w, map.width); h = Math.min(h, map.height);
+const x0 = Math.min(Math.max(cx - w / 2, 0), map.width - w);
+const y0 = Math.min(Math.max(cy - h / 2, 0), map.height - h);
+
+// Keep only sub-paths with a vertex inside the window (HTML weight)
+const inside = (d: string) => {
+  const n = d.match(/-?\d+\.?\d*/g)?.map(Number) ?? [];
+  for (let i = 0; i + 1 < n.length; i += 2) if (n[i] >= x0 && n[i] <= x0 + w && n[i + 1] >= y0 && n[i + 1] <= y0 + h) return true;
+  return false;
+};
+const clip = (d: string) => d.split(/(?=M)/).filter(inside).join('');
+const land = clip(map.indonesia), other = clip(map.neighbours);
+
+const degW = w / map.k;
+const step = degW < 8 ? 1 : 5;
+const lonA = LON0 + x0 / map.k, lonB = lonA + degW, latA = LAT0 - y0 / map.k, latB = latA - h / map.k;
+const range = (a: number, b: number) => { const o: number[] = []; for (let v = Math.ceil(a / step) * step; v <= b; v += step) o.push(v); return o; };
+const lons = range(lonA, lonB), lats = range(latB, latA);
+const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v)}°${v === 0 ? '' : v > 0 ? pos : neg}`;
+
+const u = w / 600; // 1 "screen px" at a 600px render
+const r = w / 45;
+const hid = 'loc-' + [...regions.map((g) => `${g.lon}${g.lat}`).join('')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36);
+const names = regions.map((g) => g.name).join(', ');
+---
+<svg class="locator" viewBox={`${x0} ${y0} ${w} ${h}`} role="img" aria-label={names} data-labels={labels || undefined}>
+  <defs>
+    <pattern id={hid} width={w / 70} height={w / 70} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2={w / 70} class="hatch-line" />
+    </pattern>
+  </defs>
+  <rect class="sea" x={x0} y={y0} width={w} height={h} />
+  <path class="land-other" d={other} />
+  <path class="land" d={land} />
+  {lons.map((lon) => <line class="grat" x1={P(lon, 0)[0]} x2={P(lon, 0)[0]} y1={y0} y2={y0 + h} />)}
+  {lats.map((lat) => <line class="grat" y1={P(0, lat)[1]} y2={P(0, lat)[1]} x1={x0} x2={x0 + w} />)}
+  {regions.map((g) => {
+    const [mx, my] = P(Math.floor(g.lon / CELL) * CELL, Math.ceil(g.lat / CELL) * CELL);
+    return <rect class="cell" x={mx} y={my} width={CELL * map.k} height={CELL * map.k} style={`fill:url(#${hid})`} />;
+  })}
+  {regions.map((g, i) => <circle class="dot" cx={pts[i][0]} cy={pts[i][1]} r={r} />)}
+  <rect class="frame" x={x0} y={y0} width={w} height={h} />
+  {labels && <>
+    {lons.map((lon) => <text class="grat-label" x={P(lon, 0)[0]} y={y0 + 14 * u} text-anchor="middle" style={`font-size:${9 * u}px`}>{fmt(lon, 'E', 'W')}</text>)}
+    {lats.map((lat) => <text class="grat-label" x={x0 + 6 * u} y={P(0, lat)[1] - 3 * u} style={`font-size:${9 * u}px`}>{fmt(lat, 'N', 'S')}</text>)}
+    {regions.map((g, i) => <text class="mk-fig" x={pts[i][0] + r * 1.7} y={pts[i][1] + 4 * u} style={`font-size:${11 * u}px;stroke-width:${4 * u}px`}>{g.name}</text>)}
+  </>}
+</svg>
+
+<style>
+  .locator { display: block; width: 100%; height: auto; }
+  .sea { fill: var(--sea); }
+  .land { fill: var(--paper); stroke: var(--ink); stroke-width: 0.6px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .land-other { fill: var(--paper-3); }
+  .grat { stroke: var(--line); stroke-width: 0.5px; stroke-dasharray: 2 3; opacity: 0.7; vector-effect: non-scaling-stroke; }
+  .frame { fill: none; stroke: var(--ink); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+  .grat-label { font-family: var(--font-mono); font-weight: 500; fill: var(--muted); }
+  .hatch-line { stroke: var(--index); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+  .cell { stroke: var(--index); stroke-width: 0.8px; opacity: 0.55; vector-effect: non-scaling-stroke; }
+  .dot { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+  .mk-fig { font-family: var(--font-mono); font-weight: 600; fill: var(--index-ink); paint-order: stroke; stroke: var(--paper); stroke-linejoin: round; pointer-events: none; }
+</style>

@@ -14,7 +14,7 @@ Source of truth: `PRD.md` and `PRODUCT.md`. Decisions from the interviews on 202
 | URL | `https://justinthe.github.io/geo-dt-site/`; `/` redirects to `/en/`. |
 | Now, Contact | Removed for now. About links to email instead. |
 | Word clouds | Kept as is. |
-| Missing imagery | AI illustrations, captioned "Illustration (AI-generated)". Hydropower: Gamma. The other 9: local FLUX.1-schnell via ComfyUI, palette-matched to the Gamma image. Provenance is in each folder's `PROVENANCE.md` and embedded in the file. |
+| Missing imagery | AI illustrations removed. Cover, else a location diagram if the item has regions, else the contour field. |
 | `formulae.png` | Duplicate "Water Band Index" label and arrow painted out. |
 | Design | "Map sheet": neatline, graticule ticks, sheet numbers, legend swatches, reading-time scale bar, slug-seeded contour masthead, homepage sheet-index map of Indonesia. Contract: `.impeccable/surfaces/src-pages-index-astro.md`. |
 
@@ -25,8 +25,8 @@ Source of truth: `PRD.md` and `PRODUCT.md`. Decisions from the interviews on 202
   - Timelines render as an HTML list.
   - A diagram's `title` line becomes a caption.
   - A ```` ```map ```` block becomes an interactive map.
-- **Pages:** home, projects (with sector filters), case studies, articles, About, category and tag archives (paginated), RSS per language, sitemap with hreflang, 404, and a root redirect.
-- **Navigation:** Projects, Geospatial AI, and Digital Transformation show their sheets in a menu on hover or keyboard focus. Escape closes it.
+- **Pages:** home, case studies, articles, About, category and tag archives (paginated), RSS per language, sitemap with hreflang, 404, and a root redirect.
+- **Navigation:** Geospatial AI (case studies first, then articles) and Digital Transformation show their sheets in a menu on hover or keyboard focus. Escape closes it.
 - **Search:** Pagefind, one index per language, opened with the header button or `/`.
 - **Comments:** Giscus, lazy-loaded, one thread per translationKey shared by both languages. Hidden until repo and category IDs are set.
 - **Maps:** MapLibre with the OpenFreeMap basemap, loaded on scroll only on pages that have a map. Tested with a synthetic layer; no content uses it yet.

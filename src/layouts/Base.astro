@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { site, categories, languages, type Lang } from '../config/site';
+import { site, categories, caseStudyCategory, languages, type Lang } from '../config/site';
 import { t, url, langs, getItems } from '../lib/content';
 import { offSheet } from '../lib/off-sheet';
 
@@ -28,10 +28,9 @@ const sheet = (i: Awaited<ReturnType<typeof getItems>>[number]) => ({ href: i.fa
 const projects = await getItems('projects', lang);
 const posts = await getItems('posts', lang);
 const navItems = [
-  { key: 'projects', href: url(`${lang}/projects`), label: t(lang, 'nav.projects'), menu: projects.map(sheet), all: t(lang, 'home.allProjects') },
   ...Object.entries(categories).filter(([, c]) => c.nav).map(([slug, c]) => ({
     key: slug, href: url(`${lang}/${slug}`), label: c.name[lang], all: `${t(lang, 'home.allIn')} ${c.name[lang]}`,
-    menu: posts.filter((p) => (p.entry.data as any).categories.includes(slug)).map(sheet),
+    menu: [...(slug === caseStudyCategory ? projects : []), ...posts.filter((p) => (p.entry.data as any).categories.includes(slug))].map(sheet),
   })),
   { key: 'about', href: url(`${lang}/about`), label: t(lang, 'nav.about'), menu: [], all: '' },
 ];

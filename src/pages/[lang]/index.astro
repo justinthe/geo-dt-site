@@ -8,7 +8,7 @@ import Contours from '../../components/Contours.astro';
 import { Image } from 'astro:assets';
 import { offSheet } from '../../lib/off-sheet';
 import { getItems, langs, t, url, sectorName } from '../../lib/content';
-import { categories, site, type Lang } from '../../config/site';
+import { categories, caseStudyCategory, site, type Lang } from '../../config/site';
 
 export const getStaticPaths = () => langs.map((lang) => ({ params: { lang } }));
 const lang = Astro.params.lang as Lang;
@@ -52,7 +52,7 @@ const os = offSheet(lang);
         <dl class="map-legend">
           <dt class="collar">{t(lang, 'home.legend')}</dt>
           <dd><span class="hatch" aria-hidden="true" />{t(lang, 'home.legend.region')}</dd>
-          <dd><a href={url(`${lang}/projects`)}>{t(lang, 'home.allProjects')} →</a></dd>
+          <dd><a href={`${url(`${lang}/${caseStudyCategory}`)}#case-studies`}>{t(lang, 'home.allProjects')} →</a></dd>
         </dl>
       </div>
       <aside class="index-side">
@@ -77,7 +77,7 @@ const os = offSheet(lang);
             <h2><span class="swatch" data-cat={slug} />{c.name[lang]}</h2>
             <p>{c.description[lang]}</p>
           </header>
-          <ItemList items={posts.filter((p) => (p.entry.data as any).categories.includes(slug)).slice(0, 4)} headingLevel="h3" />
+          <ItemList items={posts.filter((p) => (p.entry.data as any).categories.includes(slug)).slice(0, 4)} headingLevel="h3" thumbs={false} />
           <p class="more"><a class="collar" href={url(`${lang}/${slug}`)}>{t(lang, 'home.allIn')} {c.name[lang]} →</a></p>
         </div>
       ))}
@@ -174,6 +174,6 @@ const os = offSheet(lang);
   .entry h2 { margin: 0; font-size: var(--step-3); font-variation-settings: 'wdth' 80; display: flex; align-items: center; gap: 0.85rem; }
   .entry h2 .swatch { width: 2.5rem; border-top-width: 3px; }
   .entry header p { margin: 0; color: var(--ink-soft); max-width: 48ch; }
-  .entry :global(.sheet-row a.row-link) { grid-template-columns: 5.5rem minmax(0, 1fr); }
+  .entry :global(.sheet-row a.row-link) { grid-template-columns: minmax(0, 1fr); }
   .entry :global(.row-title) { font-size: 1.125rem; }
 </style>

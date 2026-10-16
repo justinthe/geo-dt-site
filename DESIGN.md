@@ -121,7 +121,7 @@ Printed map paper and forest-teal ink with a single terracotta index colour; res
 - **Survey Teal** (`teal`): links, hover state of row titles and legend entries, Geospatial AI category swatch (solid line), diagram edges.
 
 ### Secondary
-- **Terracotta Index** (`index`): index contours, focus ring, current-page underline in nav and filters, the short bar over prose h2, hatched index cells and lit map markers, Digital Transformation swatch (dashed line), timeline stations.
+- **Terracotta Index** (`index`): index contours, focus ring, current-page underline in nav, the short bar over prose h2, hatched index cells and lit map markers, Digital Transformation swatch (dashed line), timeline stations.
 - **Index Ink** (`index-ink`): the text-safe terracotta for figures: sheet numbers in lists, figure numbers in captions, timeline dates, elevation labels.
 
 ### Neutral
@@ -169,12 +169,11 @@ A single centred sheet, `min(100% - 2 * gutter, 78rem)`. Every content page is a
 
 ## Elevation & Depth
 
-Flat. Depth is conveyed by rule weight and paper tint: ink rules frame, hair rules separate, `paper-2` marks a raised panel (glance box, masthead, hover). Three shadows exist and all are situational: the search dialog floats over a dimmed backdrop, the nav section menus float over content, and AI illustration covers (cut-out isometric objects with no ground) cast a soft drop shadow so they sit on the paper.
+Flat. Depth is conveyed by rule weight and paper tint: ink rules frame, hair rules separate, `paper-2` marks a raised panel (glance box, masthead, hover). Two shadows exist and all are situational: the search dialog floats over a dimmed backdrop, the nav section menus float over content.
 
 ### Shadow Vocabulary
 - **Dialog lift** (`box-shadow: 0 1.5rem 3rem -1rem oklch(0.2 0.03 200 / 0.35)`): the search dialog only.
 - **Menu lift** (`box-shadow: 0 1rem 2rem -1rem oklch(0.2 0.03 200 / 0.3)`): the nav section menus only, because they float over page content.
-- **Illustration ground** (`filter: drop-shadow(0 1.25rem 1.5rem oklch(0.2 0.03 200 / 0.12))`): transparent AI illustration covers on item pages only.
 
 ### Named Rules
 **The Ruled Not Raised Rule.** Containers are bordered, never shadowed. If a surface needs separating, give it an ink or hair rule or a `paper-2` ground.
@@ -197,13 +196,16 @@ Rare and blunt; links do most of the work.
 - **Focus:** the input's own outline is removed and the form gets a 2px terracotta inset underline.
 
 ### Navigation
-Condensed collar caps in a band between an ink rule (top) and a hair rule (bottom). Default soft ink, hover ink; the current page is ink with a 2px terracotta inset underline. **Section menus:** hovering or focusing Projects, Geospatial AI or Digital Transformation drops a legend box under the link: a 1px ink border on paper with the menu lift, listing every sheet in that section (mono terracotta sheet number, Archivo title), then an "All in …" link above a hair rule. It opens after a short delay and stays closed on touch. A transparent bridge spans the gap so the pointer can cross into the box, and Escape closes it until pointer or focus leaves. Filters on listings use the same current-state underline with mono counts. Series navigation is an ink-ruled two-cell grid; TOC is a hair-ruled list whose current section gets a terracotta left rule, sticky from 68rem and collapsed into a details element below.
+Condensed collar caps in a band between an ink rule (top) and a hair rule (bottom). Default soft ink, hover ink; the current page is ink with a 2px terracotta inset underline. **Section menus:** hovering or focusing Geospatial AI or Digital Transformation drops a legend box under the link: a 1px ink border on paper with the menu lift, listing every sheet in that section (Geospatial AI lists case studies, then articles; mono terracotta sheet number, Archivo title), then an "All in …" link above a hair rule. It opens after a short delay and stays closed on touch. A transparent bridge spans the gap so the pointer can cross into the box, and Escape closes it until pointer or focus leaves. Series navigation is an ink-ruled two-cell grid; TOC is a hair-ruled list whose current section gets a terracotta left rule, sticky from 68rem and collapsed into a details element below.
 
 ### Sheet Index Row (signature)
-Lists are rows, not cards: an ink rule tops the list, hair rules divide rows. Each row: a 4:3 thumbnail (cover, or a slug-seeded contour field when there is no cover), a mono sheet number in index ink (hidden below 46rem), then title (teal on hover), serif summary in soft ink, and a sentence-case collar facet line. Rows linked to the index map get a `paper-2` fade (`lit`) and teal title when their marker is hovered or focused.
+Lists are rows, not cards: an ink rule tops the list, hair rules divide rows. Each row: a 4:3 thumbnail (cover, location diagram if item has regions, else contour field), a mono sheet number in index ink (hidden below 46rem), then title (teal on hover), serif summary in soft ink, and a sentence-case collar facet line. Rows linked to the index map get a `paper-2` fade (`lit`) and teal title when their marker is hovered or focused.
 
 ### Index Map (signature)
 SVG of Indonesia on sea wash, neighbours in paper shade, dashed graticule every 5° with mono degree labels, ink frame, north arrow and 500 km alternating scale bar at bottom left. Project regions are terracotta-hatched 2.5° cells; markers are ink circles with paper numerals that turn terracotta and grow when lit. Hover or focus on a marker or a sheet-list row lights both (list-to-map linked highlight).
+
+### Location Diagram
+Item pages and rows with `regions` and no cover show a 4:3 locator: the basemap cropped to the regions' bounding box plus 2°, dashed graticule, hatched 2.5° cells and ink dots. Regions only, never exact sites. The item page version adds region names and degree labels and a caption crediting Natural Earth.
 
 ### Contour Masthead (signature)
 Deterministic contour field seeded from the slug: ordinary lines in `line` at 0.9px and 75% opacity, every fifth level an index contour in terracotta at 1.6px with a haloed elevation label (`n m`) read left to right. Index lines and labels survey in left to right (1.6s clip, reduced-motion respected).
@@ -215,9 +217,6 @@ Deterministic contour field seeded from the slug: ordinary lines in `line` at 0.
 - **Glance box:** ink-bordered `paper-2` panel with a collar title and a ruled definition list, like a map's legend box.
 - **Adjoining sheets:** related items as a hair-ruled grid of cells topped by an ink rule.
 
-### AI Illustration Note
-Every AI-generated cover carries its provenance on screen: a "AI ILLUSTRATION" collar note at the bottom-left of row thumbnails and a sentence-case caption under item covers. Illustrated thumbnails use `object-fit: contain` with padding so the note never overlaps the image.
-
 ## Do's and Don'ts
 
 ### Do:
@@ -226,7 +225,6 @@ Every AI-generated cover carries its provenance on screen: a "AI ILLUSTRATION" c
 - **Do** divide with ink rules for structure and hair rules between peers; use `paper-2` for the rare raised panel.
 - **Do** set sheet numbers, coordinates, counts and scale values in JetBrains Mono with tabular numerals.
 - **Do** generate a contour field from the slug wherever an item has no real image, rather than a stock or placeholder picture.
-- **Do** label every AI illustration as an illustration, on the thumbnail and on the cover.
 - **Do** define every new colour in both the light and night-map themes.
 
 ### Don't:

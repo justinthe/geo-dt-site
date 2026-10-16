@@ -570,7 +570,6 @@ regions:
   - { name: "Kapuas Hulu", lon: 112.8, lat: 0.8 }
   - { name: "Lampung", lon: 105.0, lat: -5.0 }
   - { name: "Poso", lon: 120.75, lat: -1.4 }
-coverIllustration: true
 ```
 
 ---
@@ -880,7 +879,6 @@ regions:
   - { name: "Buton", lon: 122.9, lat: -5.3 }
   - { name: "Malang", lon: 112.63, lat: -7.98 }
   - { name: "Kuningan", lon: 108.48, lat: -6.98 }
-coverIllustration: true
 ```
 
 ---
@@ -1045,7 +1043,6 @@ map: false
 draft: true
 regions:
   - { name: "Belitung", lon: 107.9, lat: -2.85 }
-coverIllustration: true
 ```
 
 ---
@@ -1151,7 +1148,6 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```
 
 ---
@@ -1251,7 +1247,6 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```
 
 ---
@@ -1384,7 +1379,6 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```
 
 ---
@@ -1476,7 +1470,6 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```
 
 ---
@@ -1571,7 +1564,6 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```
 
 ---
@@ -1666,7 +1658,6 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```
 
 ---
@@ -1767,5 +1758,4 @@ updated: null
 comments: true
 map: false
 draft: true
-coverIllustration: true
 ```

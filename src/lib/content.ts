@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { site, languages, defaultLang, type Lang, categories, namedTags, sectors } from '../config/site';
+import { site, languages, defaultLang, type Lang, categories, caseStudyCategory, namedTags, sectors } from '../config/site';
 import en from '../i18n/en.json';
 import id from '../i18n/id.json';
 
@@ -65,13 +65,13 @@ export const tagName = (slug: string, lang: Lang) => namedTags[slug]?.[lang] ?? 
 export const formatDate = (d: Date, lang: Lang) =>
   d.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-/** The `n` items sharing the most tags, categories, sectors or series with `item`, best first. Ties and gaps fall back to `order`, so there are always `n` while the pool has them. Case studies count as geospatial-ai. */
+/** The `n` items sharing the most tags, categories, sectors or series with `item`, best first. Ties and gaps fall back to `order`, so there are always `n` while the pool has them. Case studies count as the caseStudyCategory practice. */
 export function related(item: Item, pool: Item[], n = 3) {
   const facets = (i: Item) => {
     const d = i.entry.data as Record<string, unknown>;
     return new Set([
       ...((d.tags as string[]) ?? []).map((x) => `t:${x}`),
-      ...((d.categories as string[]) ?? (i.kind === 'projects' ? ['geospatial-ai'] : [])).map((x) => `c:${x}`),
+      ...((d.categories as string[]) ?? (i.kind === 'projects' ? [caseStudyCategory] : [])).map((x) => `c:${x}`),
       ...[d.sector, ...((d.secondarySectors as string[]) ?? [])].filter(Boolean).map((x) => `s:${x}`),
       ...(d.series ? [`r:${d.series}`] : []),
     ]);
