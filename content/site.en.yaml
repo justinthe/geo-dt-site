@@ -1,6 +1,6 @@
 # Homepage copy (FR-46). Category names and descriptions live in src/config/site.ts.
 statement: I build geospatial AI systems in Indonesia and get people to use them.
 intro: >-
-  Work I've done and lessons I've learned in 20 years of building systems in Indonesia.
+  My Work, Reflections, and Lessons Learned from 20 Years Building Systems in Indonesia
 # translationKeys of the three "Start here" reads (case studies or articles)
 start: [spatial-ai-in-practice, hydropower-four-site-feasibility, timesheet-app-adoption]
