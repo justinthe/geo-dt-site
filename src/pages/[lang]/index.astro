@@ -8,7 +8,7 @@ import Contours from '../../components/Contours.astro';
 import { Image } from 'astro:assets';
 import { offSheet } from '../../lib/off-sheet';
 import { getItems, langs, t, url, sectorName } from '../../lib/content';
-import { categories, caseStudyCategory, site, type Lang } from '../../config/site';
+import { categories, caseStudyCategory, type Lang } from '../../config/site';
 
 export const getStaticPaths = () => langs.map((lang) => ({ params: { lang } }));
 const lang = Astro.params.lang as Lang;
@@ -23,9 +23,6 @@ const os = offSheet(lang);
 <Base lang={lang} description={copy.intro} path="" nav="home">
   <div class="wrap home">
     <div class="neatline home-frame">
-      <div class="sheet-collar collar">
-        <span>{site.author} · {projects.length} {t(lang, 'home.count.cs')} · {posts.length} {t(lang, 'home.count.a')}</span>
-      </div>
       <section class="statement-hero">
         <Contours seed="home" />
         <p class="collar">{t(lang, 'site.tagline')}</p>

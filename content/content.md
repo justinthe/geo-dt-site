@@ -893,7 +893,7 @@ Between 1990 and 2024, Belitung Island lost about 3,800 hectares of land. We mea
 | **Sector** | Environment & Pollution (secondary: Mining) |
 | **Location** | Belitung Island, Bangka Belitung, Indonesia |
 | **Client** | [TO CONFIRM: client type, or self-initiated study] |
-| **Scope** | Historical coastline change 1990–2024 and a coastline forecast to [TO CONFIRM: 2045 or 2050] |
+| **Scope** | Historical coastline change 1990–2024 and a coastline forecast to 2045 |
 | **Year** | [TO CONFIRM] |
 | **My role** | [TO CONFIRM] |
 | **Data** | Landsat 5/7/8/9, Sentinel-2, Sentinel-1 SAR, Copernicus DEM, Global Mangrove Watch, IPCC AR6 sea-level projections |
@@ -964,6 +964,8 @@ The highest-risk erosion zones sit along the mined eastern coast and along stret
 #### The forecast
 
 Under three climate scenarios (low, middle, and high emissions), the forecast classifies each stretch of coast as high risk, medium risk, low risk, or accreting. [ADD: headline forecast numbers, for example projected land loss or retreat distance per scenario, if available]
+
+![Map of Belitung's coastline with stretches of projected retreat over 10 m marked in red and the northeast section greyed out](images/belitung-coastline-forecast/forecast-retreat-2045.png "Stretches where projected retreat exceeds 10 m by 2045, middle emissions scenario. Blue is sea and beige is land; red marks the stretches of retreat. A section of the northeast coast is excluded: it showed an unusually extreme and uniform rate of change at the water's edge, more consistent with a data-processing issue than real coastal movement.")
 
 ### What we delivered
 
