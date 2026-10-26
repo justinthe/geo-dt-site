@@ -28,6 +28,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A5. Generative AI for a Small Geospatial Team
 - A6. When Clients Ask for Blockchain, Quantum or AI First
 - A7. Geospatial AI in Indonesia Starts With One Map
+- A8. GeoScholar: Cited Answers from Remote Sensing Papers
 
 ---
 
@@ -1760,4 +1761,157 @@ updated: null
 comments: true
 map: false
 draft: true
+```
+
+---
+
+## A8. GeoScholar: Cited Answers from Remote Sensing Papers
+
+*An internal question-answering tool I built at work, and how I measured whether its answers can be trusted.*
+
+GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 399 recent remote sensing papers. Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models, and the code is on [GitHub](https://github.com/justinthe/geoscholar). I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of questions (R@5 0.972).
+
+<figure><video src="/geo-dt-site/geoscholar/demo.mp4" poster="/geo-dt-site/geoscholar/cover.png" autoplay muted loop playsinline aria-label="GeoScholar answering a question with cited sources"></video><figcaption>Asking GeoScholar a question. The answer cites its sources as [S1], [S2] and so on, and the app shows each one as a paper ID and section. A question the papers can't answer gets a fixed refusal.</figcaption></figure>
+
+### At a glance
+
+| | |
+| --- | --- |
+| **Papers** | 399 papers from arXiv (a free public archive where researchers post papers), in the computer vision and image-processing categories, cut into 19,650 text pieces |
+| **Tools** | Qdrant (a search database), GROBID (a program that reads PDFs and finds their sections), bge-small-en-v1.5 (a model that turns text into numbers that capture its meaning), bge-reranker-base (a model that re-sorts search results), Llama 3.1 8B (the open language model that writes the answers), Ollama (a free program that runs language models on your own computer), FastAPI and Streamlit (the web service and the app screen), Docker Compose (starts everything with one command) |
+| **Hardware** | One desktop graphics card (RTX 3060, 12 GB of memory) |
+| **Test set** | 99 questions: 91 the papers can answer and 8 they can't |
+| **Code** | [github.com/justinthe/geoscholar](https://github.com/justinthe/geoscholar) |
+
+### Results in brief
+
+- **Finding the right paper:** the right paper was in the top 5 results 97.2% of the time (R@5 0.972). On average it landed very near the top (MRR 0.954, where 1.0 means always first).
+- **Knowing when not to answer:** it refused all 8 questions the papers can't answer, and wrongly refused 1 of the 91 it could.
+- **Staying faithful to the sources:** 88.5% of the claims in its answers were judged supported by the cited text (faithfulness 0.885) when one AI judge scored them, and 85.5% with a second judge. 80.2% of claims carry a citation.
+- **Speed:** a typical answer takes 4.5 seconds. About 0.4 seconds is search and re-sorting, and the rest is the model writing.
+
+### Terms used on this page
+
+- **Recall@5 (R@5):** how often the right paper shows up in the top 5 search results. R@1 and R@10 are the same for the top 1 and top 10.
+- **MRR (mean reciprocal rank):** how near the top the right result lands. 1.0 means it is always first.
+- **Keyword search (BM25):** finds text that shares exact words with the question.
+- **Meaning-based search (dense embeddings):** each piece of text is turned into a list of numbers (a vector) so that pieces with similar meaning get similar numbers. The question gets the same treatment, and the closest pieces win, even when the words differ.
+- **Hybrid search:** runs both and merges the two result lists with a standard formula called reciprocal rank fusion.
+- **Re-sorting the top results (reranker):** a second model reads each question and candidate together and puts the best first.
+- **Text pieces (chunks):** the slices each paper is cut into for search. Sizes are counted in tokens, roughly word fragments. A piece can repeat the end of the one before it (overlap), so a sentence on the boundary isn't lost.
+- **Faithfulness:** the share of an answer's claims that the source text actually supports.
+- **Citation coverage:** the share of claims that carry a source tag such as [S2].
+- **Kappa:** agreement between two judges beyond chance. 0.7 is substantial, 1.0 is perfect.
+- **p50 latency:** the typical wait. Half of requests are faster than this.
+- **Judge:** a language model asked to grade answers.
+- **Noise:** a difference too small to tell apart from chance.
+
+### How it works
+
+```mermaid
+flowchart LR
+  title GeoScholar: from papers to a cited answer
+  subgraph IN["Preparing the papers (once)"]
+    A["arXiv<br/>6 topics, computer vision and image processing"] --> B["PDF download"]
+    B --> C["GROBID<br/>Reads sections and text"]
+    C --> D["Text pieces (chunks)<br/>300 tokens, 50 overlap"]
+    D --> E["bge-small<br/>Turns text into numbers that capture meaning"]
+    E --> F[("Qdrant<br/>Search database")]
+  end
+  subgraph Q["Each question"]
+    Q1["Question"] --> R1["Meaning-based search (dense)<br/>30 candidates"]
+    Q1 --> R2["Keyword search (BM25)<br/>30 candidates"]
+    R1 --> RRF["Merge the two lists<br/>(reciprocal rank fusion)"]
+    R2 --> RRF
+    RRF --> RR["Re-sort (bge-reranker)<br/>Keep top 5 pieces"]
+    RR --> L["Llama 3.1 8B<br/>Strict prompt, fixed refusal line"]
+    L --> ANS["Answer with [S#] citations"]
+  end
+  F --> R1
+  F --> R2
+  ANS -.-> EV["Evaluation<br/>Recall@k, MRR, AI judge"]
+```
+
+- **Fetch and parse:** the arXiv programming interface supplies papers on six topics. GROBID turns each PDF into sections, so no text piece crosses a section boundary.
+- **Index:** each text piece is converted to numbers that capture its meaning and stored in Qdrant. A keyword index sits beside it.
+- **Retrieve:** meaning-based search and keyword search each return 30 candidates. Reciprocal rank fusion merges them, and a reranker keeps the best 5.
+- **Generate:** the model must cite every factual sentence as [S#] and reply with one fixed refusal line when the sources don't answer the question.
+- **Evaluate:** recall and MRR measure the search. Citation checks and an AI judge measure the answers.
+
+### Ingestion
+
+The run fetched 400 papers and indexed 399, because one PDF download returned a 404. GROBID parsed all 399 papers with no fallback, giving 19,650 text pieces (49 per paper on average). The index stage took about 14 minutes.
+
+I compared GROBID with PyMuPDF, a simpler PDF-reading library, on 5 sampled papers. PyMuPDF keeps all the text but returns one flat block with no headings. GROBID gives usable sections, but in 2 of the 5 papers the abstract came out as figure-caption text. I chose GROBID so I could cut text pieces by section, and noted the abstract problem as a fix to make.
+
+### Retrieval evaluation
+
+The test uses 91 answerable questions: 73 generated from the indexed text and 18 I wrote by hand. A hit means the right paper appears in the top results. R@1, R@5 and R@10 are the hit rates for the top 1, 5 and 10 results.
+
+| Search setup | R@1 | R@5 | R@10 | MRR | p50 latency |
+| --- | --- | --- | --- | --- | --- |
+| Meaning-based (dense) | 0.772 | 0.878 | 0.908 | 0.844 | 6 ms |
+| Keyword (BM25) | 0.879 | 0.945 | 0.966 | 0.929 | 26 ms |
+| Both merged (hybrid) | 0.818 | 0.952 | 0.993 | 0.901 | 37 ms |
+| Meaning-based + re-sort | 0.888 | 0.936 | 0.949 | 0.931 | 374 ms |
+| Hybrid + re-sort | 0.912 | 0.972 | 0.984 | 0.954 | 413 ms |
+
+Key: R@k is the share of questions with the right paper in the top k. MRR is closeness to the top, 1.0 being always first. p50 latency is the typical search time, in milliseconds (ms).
+
+Hybrid plus re-sorting is best on R@1, R@5 and MRR. Its R@5 gain over plain hybrid (+0.020) is within noise, but the R@1 gain is real: +0.094, with an uncertainty range of +0.037 to +0.162. I got that range by resampling the questions many times and checking how much the gain moved each time (a paired bootstrap). The price is about 10 times the wait, 37 ms to 413 ms. That is still well under half a second.
+
+The two search types fail in opposite places. On questions that use exact terms, keyword search scores 0.952 and meaning-based search 0.690. On rephrased questions it flips: meaning-based 1.000, keyword 0.571. Hybrid scores 0.881 and 1.000 on the two groups. Each group has only 7 questions, so this shows a pattern and doesn't prove it.
+
+### Text piece size: 150 vs 300 vs 450 tokens
+
+Text pieces never cross a section boundary, so actual sizes sit below the cap: 117, 208 and 278 tokens on average. With hybrid plus re-sorting, R@5 was 0.952, 0.972 and 0.952, and the differences are within noise. The typical wait grew with piece size: 277 ms, 401 ms and 498 ms. I kept 300. Once re-sorting is on, piece size mostly changes speed, not quality.
+
+### Answer quality
+
+For each answer I checked four things: the right paper was among the sources, the model refused when it should, claims carry citations, and an AI judge found them supported. I tested three variants against a baseline of 5 sources in relevance order.
+
+| Variant | Right paper in sources (hit rate) | Claims supported (faithfulness) | Claims with a citation (citation coverage) | Typical wait (p50 latency) | Refusals (of 99) |
+| --- | --- | --- | --- | --- | --- |
+| Baseline (5 sources) | 1.000 | 0.885 | 0.802 | 4.45 s | 9 |
+| Sandwich order, 5 sources | 1.000 | 0.895 | 0.818 | 4.77 s | 10 |
+| 3 sources | 0.956 | 0.888 | 0.789 | 4.49 s | 12 |
+| 8 sources | 1.000 | 0.906 | 0.800 | 5.21 s | 10 |
+
+Key: faithfulness is the share of an answer's claims the source text supports. Citation coverage is the share of claims that carry a source tag.
+
+- **Sandwich ordering** puts the best text piece first and the second best last, because models tend to pay less attention to the middle of a long prompt. It made no measurable difference: the change in supported-claim share was +0.002 (range -0.016 to +0.021).
+- **3 sources** lost the right paper on 4 questions (hit rate 0.956), and refusals rose from 9 to 12.
+- **8 sources** was 17% slower with no gain outside noise.
+
+I kept 5 sources in relevance order. Each variant was run once, with the model's randomness turned down so repeat runs give similar answers, and the model judged its own answers, so small differences are not reliable.
+
+### Can the judge be trusted?
+
+Two AI judges scored the baseline answers: the same model that wrote them (Llama 3.1 8B) and a second open model from a different developer, Qwen2.5 7B. They agreed on 89.7% of 262 claims (kappa 0.70, substantial agreement). They differ more on relevance: Llama rated 0.778 of answers as fully relevant and Qwen 0.600. So I treat the relevance score as relative only, and lead with the measures that need no judge.
+
+I also compared both judges with a second opinion on 30 claims. Those labels came from Claude, not from a human. Against them, Llama had kappa 0.80 and Qwen 0.93. Claude and the two judges may share blind spots that a human would not, and a human check is still to do.
+
+### Lessons learned
+
+1. **Keyword and meaning-based search fail in opposite places.** Meaning-based search missed questions heavy on acronyms and product names, and keyword search missed rephrased questions. Hybrid search covers both.
+2. **Re-sorting can only reorder what it is given.** Meaning-based search left the right paper out of the top 10 for 6 questions, hybrid for none. Re-sorting also hurts sometimes: on one question it moved the right paper from rank 1 down to rank 6.
+3. **Generated questions favour keyword search.** Keyword search scored 1.000 on the 73 generated questions. On the 18 I wrote by hand it scored 0.720 against 0.870 for hybrid. The hand-written set is the better guide to real queries, though 18 questions is small.
+4. **Report the measures that need no judge first.** The 8B judge made arithmetic mistakes: it marked "requires 4 more rounds" as unsupported when the source says 11 rounds against 7.
+5. **With re-sorting on, text piece size is mostly a speed setting.**
+6. **Questions that span several papers fail in every setup.** Four of them did. Pieces from one paper crowd out the others. Next step: keep one piece per paper before ranking.
+
+### Site metadata
+
+```yaml
+title: "GeoScholar: Cited Answers from Remote Sensing Papers"
+lang: en
+translationKey: geoscholar-rag
+categories: [geospatial-ai]
+tags: [rag, remote-sensing, evaluation, internal-tools]
+summary: "An internal tool that answers questions from 399 remote sensing papers with cited sources, and how I measured whether its answers can be trusted."
+published: 2026-10-26
+updated: null
+comments: true
+map: false
+cover: cover.png
 ```

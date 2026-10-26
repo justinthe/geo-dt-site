@@ -68,7 +68,7 @@ body {
 ::selection { background: var(--select); color: var(--ink); }
 :focus-visible { outline: 2px solid var(--index); outline-offset: 3px; border-radius: 1px; }
 html { scrollbar-color: var(--line) var(--paper-2); }
-img, svg { max-width: 100%; height: auto; }
+img, svg, video { max-width: 100%; height: auto; }
 a { color: var(--teal); text-decoration-thickness: 1px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in oklch, currentColor 45%, transparent); }
 a:hover { text-decoration-color: var(--index); }
 h1, h2, h3, h4 {
@@ -289,7 +289,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .prose > p:first-child > em:only-child { font-size: var(--step-1); color: var(--ink-soft); }
 
 .prose figure, .prose .figure { margin: 2.2rem 0; }
-.prose img { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--paper-2); }
+.prose img, .prose video { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--paper-2); }
 .prose figcaption { margin-top: 0.6rem; font: 400 0.875rem/1.45 var(--font-sans); color: var(--muted); display: flex; gap: 0.75rem; }
 .prose figcaption .figure-num { color: var(--index-ink); flex: none; font-size: 0.8rem; padding-top: 0.08rem; }
 @media (min-width: 68rem) {

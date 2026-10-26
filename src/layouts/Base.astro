@@ -32,6 +32,7 @@ const navItems = [
     key: slug, href: url(`${lang}/${slug}`), label: c.name[lang], all: `${t(lang, 'home.allIn')} ${c.name[lang]}`,
     menu: [...(slug === caseStudyCategory ? projects : []), ...posts.filter((p) => (p.entry.data as any).categories.includes(slug))].map(sheet),
   })),
+  { key: 'geoscholar-rag', href: url(`${lang}/posts/geoscholar-rag`), label: t(lang, 'nav.rag'), menu: [], all: '' },
   { key: 'about', href: url(`${lang}/about`), label: t(lang, 'nav.about'), menu: [], all: '' },
 ];
 const ogImage = image && new URL(image, Astro.site).href;
