@@ -60,12 +60,13 @@ const jsonld = kind === 'pages' ? undefined : {
   mainEntityOfPage: new URL(url(`${lang}/${path}`), Astro.site).href,
 };
 ---
-<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? caseStudyCategory : kind === 'pages' || key === 'geoscholar-rag' ? key : d.categories?.[0]}>
+<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? caseStudyCategory : kind === 'pages' ? key : d.categories?.includes('ai-projects') ? 'ai-projects' : d.categories?.[0]}>
   <div class="wrap">
-    <div class="sheet-collar collar">
-      <span>{sheetKind ?? site.author}</span>
-      <span class="figure-num">{coord ?? (kind !== 'pages' && formatDate(item.date, lang))}</span>
-    </div>
+    {(coord || kind !== 'pages') && (
+      <div class="sheet-collar collar" style="justify-content:flex-end">
+        <span class="figure-num">{coord ?? formatDate(item.date, lang)}</span>
+      </div>
+    )}
     <article class="neatline sheet" data-pagefind-body={item.fallback ? undefined : ''}>
       <div class="masthead" data-pagefind-ignore>
         <Contours seed={key} labels />

@@ -40,6 +40,14 @@ export const categories: Record<string, { name: L; description: L; nav: boolean 
     },
     nav: true,
   },
+  'ai-projects': {
+    name: { en: 'AI projects', id: 'Proyek AI' },
+    description: {
+      en: 'Tools I built with AI, and how I measured whether they can be trusted.',
+      id: 'Alat yang saya bangun dengan AI, dan cara saya mengukur apakah hasilnya dapat dipercaya.',
+    },
+    nav: true,
+  },
 };
 
 // Tags with their own names; other tags are shown from their slug.
