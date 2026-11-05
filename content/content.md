@@ -29,6 +29,8 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A6. When Clients Ask for Blockchain, Quantum or AI First
 - A7. Geospatial AI in Indonesia Starts With One Map
 - A8. GeoScholar: Cited Answers from Remote Sensing Papers
+- A9. RekrutOps: A Recruiting Assistant That Asks Before It Acts
+- A10. The Agentic SDLC on a Small Team: Where My Pipeline Helped and Where It Didn't
 
 ---
 
@@ -2026,4 +2028,101 @@ updated: null
 comments: true
 map: false
 cover: cover.png
+```
+
+## A10. The Agentic SDLC on a Small Team: Where My Pipeline Helped and Where It Didn't
+
+*What happened when I ran two internal apps through an AI-assisted build process, phase by phase, and what I checked with numbers instead of by feel.*
+
+GeoScholar is an internal tool that answers questions from 399 research papers. To test its search, I used two sets of questions. I generated 73 of them from the papers' own text. I wrote 18 by hand, the way a colleague would ask. A search passes a question when the right paper shows up in its top 5 results.
+
+On the generated questions, plain keyword search (called BM25) passed all 73, a score of 1.000. That matched my final setup and was faster. On my 18 hand-written questions, the same search scored 0.720, against 0.870 for the setup I chose, which also searches by meaning. The first number misled because a generated question reuses the wording of the passage it came from, and keyword search is built to match exact words. My own questions rephrase things, and that is where it fails. If I had trusted the first number, I would have kept the simpler search and it would have missed more of the questions people ask.
+
+I used an AI coding agent to build two internal apps, [GeoScholar](/geo-dt-site/en/posts/geoscholar-rag/) and [RekrutOps](/geo-dt-site/en/posts/rekrutops-recruiting-assistant/). Below, phase by phase: what the agent did and what I did to check it. For some phases I did nothing.
+
+### Terms used on this page
+
+- **SDLC (software development life cycle):** the phases software goes through, from deciding what to build to keeping it running.
+- **Agentic:** the AI does a task in several steps, using tools such as reading files and running tests, instead of suggesting one line at a time. I set the goal, then review.
+- **PRD (product requirements document):** a written description of what the app must do, and for whom.
+- **Eval (evaluation):** a fixed list of questions or tasks with known right answers, used to score the app the same way every time.
+
+### My process
+
+I built a Claude Code skill called `/vibe-pipeline` around the software life cycle: decide what to build, design it, build it, test it, ship it. In an agentic version of that cycle, an AI agent does the work of each phase and a person reviews between them. A skill is a set of written instructions Claude Code loads for a particular job. I wrote this one myself.
+
+It starts the way any project starts, with me saying what I have in mind: the idea, who will use it, the features I must have first, and any constraints. From there it works through requirements, design and a build plan, one stage at a time. It stops after each stage and waits for my review, because each stage is the input to the next, and a wrong assumption in the first would run through all the rest.
+
+### Phase by phase
+
+Rows marked "Ideal" are phases I did not run through the agent. The cell says what I would want it to do.
+
+| SDLC phase | What the agent did | What I did | Used on |
+| --- | --- | --- | --- |
+| Requirements and design | Wrote the PRD, the architecture, and a mockup or code skeleton | Read each one and asked for changes, about 5 rounds on the PRD | Both |
+| Coding | Wrote the app from the build prompts | Skimmed the code | Both |
+| Code review | Ideal: a second agent reads the finished change against the PRD, writes comments, and cannot edit the code | A quick read myself | Both |
+| Testing | Wrote the tests and the eval scripts | Wrote the hand-made eval questions and read the results | GeoScholar: 99 questions. RekrutOps: 82 tests and an eval on 55 synthetic CVs |
+| Deployment | Wrote the Docker Compose setup | Chose the target machine | Both |
+| Documentation | Kept a decision log and notes for each build phase as it went | Read them | RekrutOps: 75 decision records |
+| Security review | Ideal: runs a standard scanner for known weaknesses and for keys left in files, explains the results, proposes fixes | Skipped: both apps run internally only | Neither |
+| Operations and incidents | Ideal: reads the logs on a schedule, writes a short report, opens a ticket, and proposes a fix as a pull request | Not done | Neither |
+
+### Where the review gates steer
+
+I had expected the review gates to catch mistakes. In practice they are where I tune the output to what I had in mind. I read the PRD, change what is off, and run the stage again, about five rounds in all. I did the same on every later stage.
+
+I would never skip the PRD. Without it the whole app can drift, and everything built on it drifts too. Skipping the architecture stage costs less, but it is where I decide about the machine the app will run on: for both apps, one desktop with a 12 GB graphics card and free local models. That choice sets what is possible later.
+
+None of this is measured. I did not time the stages, so I have no figure for hours saved or spent. The gates feel useful. I cannot show you a number.
+
+### Where numbers catch what reading does not
+
+Claude Code wrote the first scoring prompt in RekrutOps from the PRD. RekrutOps scores CVs against a rubric and proposes a shortlist. The app ran, and a shortlist appeared. Nothing crashed.
+
+Then I compared its ranking with my answer key using Spearman rho, a number for how closely two rankings agree: 1 means the same order, 0 means unrelated. The result was 0.11, so the shortlist was nearly random. The model had put its supporting quotes in the wrong field of its answer, and only 81 of 259 quotes could be found in the CV. Swapping the order of the fields, so the model gave the quote before the reason and the score, raised the rho to 0.88. Reading the output at a gate would not have shown me this. The shortlist looked like a shortlist.
+
+The opening example comes from GeoScholar's search. I compared three kinds:
+
+- BM25 is keyword search. It finds text that shares exact words with the question.
+- Meaning-based search turns text into numbers that capture its meaning, so a rephrased question still finds the right passage.
+- Hybrid search runs both and merges the results.
+
+On the 7 hand-written questions that rephrase the idea, BM25 managed only 0.571 and hybrid scored 1.000. I picked hybrid.
+
+Two ideas that sounded sensible turned out not to matter. One was sandwich ordering: arranging the passages so the best one comes first and the second best comes last, because models tend to pay less attention to the middle of a long prompt. It changed the share of supported claims by 0.002, which is noise. The other was k, the number of passages handed to the model. With k at 3 the model lost the right paper on 4 questions. With k at 8 answers were 17% slower and no better. I kept k at 5.
+
+### Deploying and writing it down
+
+Both apps start with Docker Compose, a tool that starts every part of an app with one command, on a clean machine. Neither project has an automatic build-and-test pipeline. The tests and the eval run on demand in their own container, which does the job automatic checks would do on a larger team. The agent also kept notes as it went. RekrutOps has a log of 75 decisions, including the ones I got wrong, and I wrote its article from them.
+
+### What a small internal project needs, and what it can leave out
+
+Build, test and deploy are the phases I treat as necessary for a small internal project, because they decide whether the app works at all. My pipeline has a stage for each. The other three I handled by hand or not at all, since for one builder and a few internal users they cost more than they return. In a fuller version of the skill, the agent would handle them like this.
+
+For code review, a second agent reads the finished change with the PRD and the architecture document open beside it. It can read the code but not edit it, so it cannot quietly fix what it was meant to judge. I accept or dismiss each comment. It should run as a separate session, ideally on a different model, because a model that checks its own work tends to approve it.
+
+For security review, a standard scanner checks the code and the libraries for known weaknesses and checks that no passwords or keys sit in the files. An internal app can still leak personal data, and RekrutOps holds CVs, so this is the phase I would add first. The scanner decides what counts as a finding. The agent runs it, explains the results in plain words and proposes fixes, which the scanner checks again.
+
+For operations, the agent reads the app's logs on a schedule and writes a short report: what ran, what failed, what is slow. When something looks wrong it opens a ticket with the evidence attached. When the cause is clear, it also opens a pull request, a proposed code change that waits for approval, with a test that fails before the fix and passes after. A person merges it. A restart or a rollback changes the running app, so those wait for a person's approval, with a record of who gave it.
+
+A fuller version would also run the tests and evals on every change before it is accepted, so a prompt edit like the one that dropped RekrutOps' ranking to 0.11 is caught the same day. I did not build these stages because the apps did not need them yet. I would add them as an app gains users or moves outside the company.
+
+### What this does not show
+
+This is one person and two small internal apps. I did not time anything, so I cannot say the pipeline made me faster. The test numbers come from my own question sets, and I tuned the RekrutOps prompt on the same CVs I tested on, so those results are not held-out. What I can say is narrower: the review gates helped me get the app I had in mind, and the fixed question sets caught two problems that reading the output had not.
+
+### Site metadata
+
+```yaml
+title: "The Agentic SDLC on a Small Team: Where My Pipeline Helped and Where It Didn't"
+lang: en
+translationKey: agentic-sdlc-small-team
+categories: [ai-projects]
+tags: [agentic-ai, sdlc, evaluation, claude-code]
+summary: "I built two internal apps with an AI coding agent. Phase by phase, what the agent did, what I checked, and what only the numbers caught."
+published: 2026-11-05
+updated: null
+comments: true
+map: false
 ```
