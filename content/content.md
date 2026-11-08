@@ -31,6 +31,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A8. GeoScholar: Cited Answers from Remote Sensing Papers
 - A9. RekrutOps: A Recruiting Assistant That Asks Before It Acts
 - A10. The Agentic SDLC on a Small Team: Where My Pipeline Helped and Where It Didn't
+- A11. Why I Used a Graph, Not a Script, to Triage Fire Hotspots
 
 ---
 
@@ -1467,7 +1468,7 @@ Coastlines shift with the tide and crops change with the season. Unless imagery 
 title: "Spatial AI in Practice"
 lang: en
 translationKey: spatial-ai-in-practice
-categories: [geospatial-ai, digital-transformation]
+categories: [geospatial-ai]
 tags: [spatial-ai, machine-learning, remote-sensing, ground-truth, lessons-learned]
 summary: "What spatial AI does well, why it struggles in tropical and local conditions, and seven rules for making it work."
 published: null
@@ -1908,7 +1909,7 @@ I also compared both judges with a second opinion on 30 claims. Those labels cam
 title: "GeoScholar: Cited Answers from Remote Sensing Papers"
 lang: en
 translationKey: geoscholar-rag
-categories: [geospatial-ai, ai-projects]
+categories: [ai-projects]
 tags: [rag, remote-sensing, evaluation, internal-tools]
 summary: "An internal tool that answers questions from 399 remote sensing papers with cited sources, and how I measured whether its answers can be trusted."
 published: 2026-10-26
@@ -2020,7 +2021,7 @@ Next I would build a held-out set with a new seed, put 5 to 10 CVs aside before 
 title: "RekrutOps: A Recruiting Assistant That Asks Before It Acts"
 lang: en
 translationKey: rekrutops-recruiting-assistant
-categories: [geospatial-ai, ai-projects]
+categories: [ai-projects]
 tags: [agentic-ai, human-in-the-loop, evaluation, privacy, internal-tools]
 summary: "A local recruiting assistant that scores CVs, proposes a shortlist and drafts emails, with a person approving each step. I measured it on 55 synthetic CVs and list what those numbers cannot show."
 published: 2026-10-27
@@ -2122,6 +2123,135 @@ categories: [ai-projects]
 tags: [agentic-ai, sdlc, evaluation, claude-code]
 summary: "I built two internal apps with an AI coding agent. Phase by phase, what the agent did, what I checked, and what only the numbers caught."
 published: 2026-11-05
+updated: null
+comments: true
+map: false
+```
+
+## A11. Why I Used a Graph, Not a Script, to Triage Fire Hotspots
+
+*An internal tool that sorts satellite fire detections, waits for a person to approve them, and only then asks a local model to explain them. What the graph structure gave me, with measurements.*
+
+NASA's fire satellites report a hotspot as a point on a map. One fire usually shows up as several points, and some points are not worth anyone's morning. I built an internal tool that groups the points into clusters, collects evidence for each cluster, scores them, and asks a person to approve the list before a model writes the alert. I ran it 20 times on recorded data with a local model. Every run took about 31 seconds, and 31 of those seconds were the model writing the report. Everything before the model call took about 4 milliseconds in total, and the scores came out identical in five separate processes.
+
+This article is about one design choice: building the flow as an explicit graph in LangGraph instead of one Python script. I list what the graph bought me, what it cost, and what I cannot claim from the numbers I have.
+
+![The tool running offline: the cluster table, the approval prompts, and the output files.](images/hotspot-graph-langgraph/demo.gif "Offline run on recorded data. Approvals are typed at the prompt; the report is written once they are done.")
+
+### Terms used on this page
+
+- **FIRMS:** NASA's Fire Information for Resource Management System. It publishes satellite fire detections, each with a position, a heat reading (fire radiative power, FRP) and a confidence value.
+- **Cluster:** detections close together, grouped as one probable fire. I group points within 1 km of each other with DBSCAN, a standard clustering method.
+- **LangGraph:** a Python library where each step of a flow is a node, the connections between steps are edges, and a shared state object is passed along.
+- **Checkpointer:** the part of LangGraph that saves the state after each step. Mine writes to a SQLite file.
+- **Structured output:** asking the model to answer in a fixed shape, here a Pydantic model, instead of free text.
+
+### The flow
+
+Region and thresholds sit in a config file, and the first region is Majalengka, West Java. A run goes through these steps:
+
+1. Fetch the latest FIRMS detections for the region.
+2. Cluster them.
+3. For each cluster, gather three kinds of evidence at the same time: current weather from Open-Meteo, the last 7 days of detections nearby, and the land cover from ESA WorldCover.
+4. Score each cluster from 0 to 100 with a fixed formula.
+5. Stop and show the clusters to a person, who approves, edits or rejects each one.
+6. Ask a local model to write the report for the approved clusters, then check what it wrote.
+7. Write a Markdown report and a GeoJSON file that opens in QGIS.
+
+```mermaid
+graph TD
+    start([start]) --> fetch_firms
+    fetch_firms --> cluster
+    fetch_firms -.-> done([end])
+    cluster --> weather
+    cluster --> history
+    cluster --> landcover
+    weather --> score
+    history --> score
+    landcover --> score
+    score --> gate
+    gate --> report
+    gate -.-> done
+    report --> report
+    report --> assess_damage
+    assess_damage --> write_outputs
+    write_outputs --> done
+```
+
+The diagram is exported from the graph itself, so it cannot drift from the code. The loop on `report` is the retry I describe below.
+
+### Why a graph and not a script
+
+A script with the same seven steps would be shorter. I chose the graph for two reasons.
+
+**First, the structure is visible.** The three evidence steps are independent, so they sit side by side in the graph and join at the scorer. A person reading the diagram sees what depends on what without opening a file. The retry on the report step shows up as one extra edge, and the diagram makes it plain that the report cannot run before the approval step.
+
+**Second, the run can stop and continue later.** Step 5 uses LangGraph's `interrupt()`. The state is saved to SQLite, and the command exits. Pressing `q` at the approval prompt took 1.1 seconds. Running `resume <run_id>` in a new process picked up at the same prompt and finished in 32.1 seconds, nearly all of it the model writing. In a script I would have written that save-and-restore code myself, and I would have had to trust it.
+
+That second point has a cost. Resuming asks about every cluster again, including ones I had already decided before quitting, because the decisions are only stored when the gate finishes. I have not fixed it.
+
+On the tooling: LangGraph runs the flow, and `langchain-ollama` connects it to a local `qwen2.5:7b-instruct` model through Ollama, with Pydantic structured output for the report. Nothing calls a paid API.
+
+### The model explains, Python scores
+
+I do not let the model produce any number. The score, the severity band and every figure in the report come from plain Python. The model is given the evidence for the approved clusters and asked to explain it, citing the fields it used.
+
+That makes the scoring step testable in a way a model call is not. I ran the part of the pipeline before the model in five separate processes and hashed the scored list. All five hashes were the same.
+
+It also gave me a clean way to handle missing data. Each evidence step retries with backoff, and if it still fails for a cluster, the cluster is scored on what is left and flagged as partial. To test it, I forced the weather lookup to fail. All five clusters were flagged partial with `missing=['weather']`, and every score dropped by 2.7 points, from a range of 14.5 to 20.8 down to 11.8 to 18.1. All stayed in the low band. The run still finished and wrote its outputs.
+
+One result from that test I did not expect. The report step failed validation three times under the outage and fell back to a template report. I did not record why, so I cannot say whether missing weather confuses the model or something else does.
+
+### Checking what the model wrote
+
+Each finding in the report cites fields, such as `frp_sum` or `rh`, with the value the model used. A validator checks that every cited value exists in the evidence given to the model. If it does not, the step runs again with the error in the prompt, up to three times. After three failures a template report is written, and the error text is put in the report's caveats.
+
+My first version of the prompt failed this check. The model grouped values under a made-up name, for example `weather="rh: 57, wind_kmh: 3.9"`, and later nested whole dictionaries. None of those match a single value in the evidence. I did not loosen the validator. I changed the prompt to say that each cited field must be one flat key with one number or string copied from the evidence. When I investigated, the report passed on the second attempt. In the 20 measured runs after that, it passed on the first attempt every time. Per-run times were 31.0 to 33.3 seconds, with a median of 31.5.
+
+### Four bugs I only found by running it
+
+- **Resume keys.** `Command(resume=...)` treats a dictionary as a map of interrupt IDs and runs a pattern match on every key. My cluster IDs were integers, so resuming crashed with a `TypeError`. A test caught it. The fix was to use string keys.
+- **FIRMS range limit.** The API accepts at most 5 days per request, and my history step asked for 7. I found out while recording test data, and the fix is to split the request into chunks.
+- **Rich markup.** The approval prompt printed `cluster 0 pprove/dit/eject/uit:`. The console library treated `[a]`, `[e]`, `[r]` and `[q]` as formatting. It only showed up when the commands in the README were run and the output was compared with what the README promised.
+- **Silent fallback.** The first version fell back to the template without saying why. I now put the last error in the report caveats.
+
+Three of the four were found by tests or by running the commands, not by reading the code.
+
+### How I built it, and a rough measure of the agent work
+
+I built it with Claude Code subagents, one model per phase. [The agentic SDLC article](/geo-dt-site/en/posts/agentic-sdlc-small-team/) covers the wider process behind my earlier apps. A planning agent on Opus wrote the plan, coding agents on Sonnet wrote the modules, and Haiku agents wrote the tests, recorded the data and ran the commands. Each of the 14 tasks ran as one agent run. The code is 710 lines in `src/` and 588 lines of tests, and 33 tests pass.
+
+I applied the bookkeeping from METR's work on measuring AI task length (the paper is arXiv 2503.14499) to those 14 tasks. METR times skilled humans on tasks, records whether the AI succeeded, and reports the task length at which the AI succeeds about half the time. My version is much rougher:
+
+- The human time for each task is my estimate, not something I measured. I assumed a mid-level Python engineer who knows geospatial data and is new to LangGraph. The total comes to about 21 hours, with a range of 12 to 36.
+- The agents' summed wall-clock time was 30 minutes.
+- 12 of the 14 tasks were accepted on the first try. The tests and the README each needed a follow-up, because they exposed a bug.
+
+Dividing 21 hours by 30 minutes gives about 42 times. I would not quote that. It leaves out my own time orchestrating and reviewing, and one task, the graph, nodes and CLI, carries an estimate of 7 hours that I am least sure of. A different engineer would move the number by a factor of two to five.
+
+On the task length at which success drops to half: it never did, in any group. First-try success was 3 of 3 for tasks under about 50 minutes, 4 of 5 for tasks of 70 to 100 minutes and 2 of 3 for longer ones. With 14 tasks I cannot fit a curve. All I can say is that the 50% point is above what I tested.
+
+### What this does not show
+
+- All the results come from recorded data: 7 detections from 10 September 2023, which form 5 clusters, all scored low. I have not run it against a live fire event.
+- The weather fixture was recorded in November 2026, so it does not match the date of the fires.
+- The scores have not been checked against what happened on the ground, so I cannot say they rank fires correctly. They show that the pipeline is deterministic and that missing data is handled, not that the formula is right.
+- The 20 runs use one model on one graphics card, and the report passed on the first try each time. Under the weather outage it did not, and I do not know why.
+- The human-time numbers have no control, because nobody did these tasks by hand.
+- The report has an Indonesian option (`--lang id`). I have not tested it, so treat it as experimental.
+
+What I can say is narrower. For a flow that has to stop for a person and continue later, the graph gave me the pause, the resume and the diagram without extra code, and keeping every number out of the model made the part that matters testable.
+
+### Site metadata
+
+```yaml
+title: "Why I Used a Graph, Not a Script, to Triage Fire Hotspots"
+lang: en
+translationKey: hotspot-graph-langgraph
+categories: [ai-projects]
+tags: [langgraph, agentic-ai, human-in-the-loop, firms, evaluation]
+summary: "An internal tool that clusters NASA fire detections, waits for a person to approve them, then has a local model explain them. What the graph structure gave me, with 20 measured runs."
+published: 2026-11-07
 updated: null
 comments: true
 map: false

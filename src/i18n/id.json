@@ -66,5 +66,8 @@
   "home.start": "Mulai dari sini",
   "home.noRegion": "Belum ada wilayah terpublikasi, jadi tidak ada di peta:",
   "list.practice.cs": "Studi kasus",
-  "list.practice.a": "Artikel"
+  "list.practice.a": "Artikel",
+  "list.all": "Semua",
+  "list.forFun": "Iseng",
+  "list.filter": "Saring"
 }
