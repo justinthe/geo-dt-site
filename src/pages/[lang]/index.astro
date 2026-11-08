@@ -8,7 +8,7 @@ import Contours from '../../components/Contours.astro';
 import { Image } from 'astro:assets';
 import { offSheet } from '../../lib/off-sheet';
 import { getItems, langs, t, url, sectorName } from '../../lib/content';
-import { categories, caseStudyCategory, type Lang } from '../../config/site';
+import { categories, type Lang } from '../../config/site';
 
 export const getStaticPaths = () => langs.map((lang) => ({ params: { lang } }));
 const lang = Astro.params.lang as Lang;
@@ -49,7 +49,7 @@ const os = offSheet(lang);
         <dl class="map-legend">
           <dt class="collar">{t(lang, 'home.legend')}</dt>
           <dd><span class="hatch" aria-hidden="true" />{t(lang, 'home.legend.region')}</dd>
-          <dd><a href={`${url(`${lang}/${caseStudyCategory}`)}#case-studies`}>{t(lang, 'home.allProjects')} →</a></dd>
+          <dd><a href={url(`${lang}/work`)}>{t(lang, 'home.allProjects')} →</a></dd>
         </dl>
       </div>
       <aside class="index-side">

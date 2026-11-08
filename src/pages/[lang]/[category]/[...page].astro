@@ -1,24 +1,49 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import Listing from '../../../components/Listing.astro';
-import ItemList from '../../../components/ItemList.astro';
-import { getItems, langs, t } from '../../../lib/content';
-import { categories, caseStudyCategory } from '../../../config/site';
+import { getItems, langs, t, url } from '../../../lib/content';
+import { offSheet } from '../../../lib/off-sheet';
+import { categories, navGroups, groupOf } from '../../../config/site';
 
+// One listing per category, plus one per nav group (work, writing, builds).
 export const getStaticPaths = (async ({ paginate }) =>
   (await Promise.all(langs.map(async (lang) => {
+    const hasCat = (p: any, cats: string[]) => p.entry.data.categories.some((c: string) => cats.includes(c));
     const posts = await getItems('posts', lang);
     const projects = await getItems('projects', lang);
-    return Object.keys(categories).flatMap((category) =>
-      paginate(posts.filter((p) => (p.entry.data as any).categories.includes(category)), { params: { lang, category }, props: { lang, category, projects: category === caseStudyCategory ? projects : [] }, pageSize: 10 }));
+    const groups = Object.entries(navGroups).flatMap(([category, g]) =>
+      paginate(g.projects ? projects : posts.filter((p) => hasCat(p, g.cats)), { params: { lang, category }, props: { lang, category }, pageSize: 10 }));
+    const cats = Object.keys(categories).flatMap((category) =>
+      paginate(posts.filter((p) => hasCat(p, [category])), { params: { lang, category }, props: { lang, category }, pageSize: 10 }));
+    return [...groups, ...cats];
   }))).flat()) satisfies GetStaticPaths;
-const { lang, category, projects, page } = Astro.props;
+const { lang, category, page } = Astro.props;
+const group = navGroups[category] ? category : groupOf(category)!;
+const g = navGroups[group];
+const meta = navGroups[category] ?? categories[category];
+const chips = g.cats.length || g.offSheet
+  ? [
+      { href: url(`${lang}/${group}`), label: t(lang, 'list.all'), current: category === group },
+      ...g.cats.map((c) => ({ href: url(`${lang}/${c}`), label: categories[c].name[lang], current: category === c })),
+      ...(g.offSheet ? [{ href: url(`${lang}/off-the-sheet`), label: t(lang, 'list.forFun'), current: false }] : []),
+    ]
+  : [];
+const fun = g.offSheet && category === group ? offSheet(lang).items : [];
 ---
-<Listing lang={lang} title={categories[category].name[lang]} intro={categories[category].description[lang]} path={category} nav={category} page={page} extra={projects.length} listHeading={projects.length ? t(lang, 'list.practice.a') : undefined}>
-  {projects.length > 0 && (
-    <section class="practice-cs" aria-labelledby="case-studies">
-      <h2 id="case-studies" class="collar">{t(lang, 'list.practice.cs')}</h2>
-      <ItemList items={projects} headingLevel="h3" />
+<Listing lang={lang} title={meta.name[lang]} intro={meta.description[lang]} path={category} nav={group} page={page} extra={fun.length}>
+  {chips.length > 0 && (
+    <nav aria-label={t(lang, 'list.filter')}>
+      <ul class="legend">
+        {chips.map((c) => <li><a href={c.href} aria-current={c.current ? 'page' : undefined}>{c.label}</a></li>)}
+      </ul>
+    </nav>
+  )}
+  {fun.length > 0 && (
+    <section aria-labelledby="for-fun">
+      <h2 id="for-fun" class="collar">{t(lang, 'list.forFun')}</h2>
+      <ul class="legend">
+        {fun.map((i: any) => <li><a href={i.href} target="_blank" rel="noopener"><strong>{i.title}</strong> {i.desc}</a></li>)}
+      </ul>
     </section>
   )}
 </Listing>

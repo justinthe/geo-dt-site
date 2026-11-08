@@ -222,6 +222,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; list-style: none; margin: 0; padding: 0; }
 .legend a, .legend .plain { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--ink); text-decoration: none; }
 .legend a:hover { color: var(--teal); }
+.legend a[aria-current] { font-weight: 700; color: var(--teal); }
 .swatch { display: inline-block; width: 1.6rem; height: 0; border-top: 2px solid var(--teal); }
 .swatch[data-cat='digital-transformation'] { border-top: 2px dashed var(--index); }
 .swatch[data-tag] { border-top: 1px dotted var(--muted); }

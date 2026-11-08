@@ -20,8 +20,8 @@ export const site = {
 };
 
 type L = Record<Lang, string>;
-// Adding a category = one entry here (FR-29). `nav: false` makes it a tag-style listing only.
-// Every case study belongs to this practice: listed on its page and in its nav menu.
+// Adding a category = one entry here (FR-29). `nav: true` lists it on the homepage; `false` makes it a tag-style listing only.
+// Case studies count as this practice in related() scoring.
 export const caseStudyCategory = 'geospatial-ai';
 export const categories: Record<string, { name: L; description: L; nav: boolean }> = {
   'geospatial-ai': {
@@ -41,7 +41,7 @@ export const categories: Record<string, { name: L; description: L; nav: boolean 
     nav: true,
   },
   'ai-projects': {
-    name: { en: 'AI projects', id: 'Proyek AI' },
+    name: { en: 'AI tools', id: 'Alat AI' },
     description: {
       en: 'Tools I built with AI, and how I measured whether they can be trusted.',
       id: 'Alat yang saya bangun dengan AI, dan cara saya mengukur apakah hasilnya dapat dipercaya.',
@@ -49,6 +49,37 @@ export const categories: Record<string, { name: L; description: L; nav: boolean 
     nav: true,
   },
 };
+
+// Top-nav groups. Each is a page at /{lang}/{key}/; its `cats` are the category pages shown as chips.
+export const navGroups: Record<string, { name: L; description: L; cats: string[]; projects?: boolean; offSheet?: boolean }> = {
+  work: {
+    name: { en: 'Work', id: 'Proyek' },
+    projects: true,
+    cats: [],
+    description: {
+      en: 'Case studies: what was built, under what constraints, and what changed.',
+      id: 'Studi kasus: apa yang dibangun, dengan batasan apa, dan apa yang berubah.',
+    },
+  },
+  writing: {
+    name: { en: 'Writing', id: 'Tulisan' },
+    cats: ['geospatial-ai', 'digital-transformation'],
+    description: {
+      en: 'Articles on geospatial AI and digital transformation.',
+      id: 'Artikel tentang AI geospasial dan transformasi digital.',
+    },
+  },
+  builds: {
+    name: { en: 'Builds', id: 'Proyek Saya' },
+    cats: ['ai-projects'],
+    offSheet: true,
+    description: {
+      en: 'Tools I built with AI, and things I build for fun.',
+      id: 'Alat yang saya bangun dengan AI, dan hal-hal yang saya buat untuk bersenang-senang.',
+    },
+  },
+};
+export const groupOf = (cat: string) => Object.keys(navGroups).find((g) => navGroups[g].cats.includes(cat));
 
 // Tags with their own names; other tags are shown from their slug.
 export const namedTags: Record<string, L> = {

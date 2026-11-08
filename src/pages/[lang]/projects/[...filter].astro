@@ -1,8 +1,8 @@
 ---
-// Retired list and sector-filter pages: stubs that send old links to the Geospatial AI page.
+// Retired list and sector-filter pages: stubs that send old links to the Work page.
 import Redirect from '../../../components/Redirect.astro';
-import { langs, url, categoryName } from '../../../lib/content';
-import { sectors, caseStudyCategory } from '../../../config/site';
+import { langs, url } from '../../../lib/content';
+import { sectors, navGroups } from '../../../config/site';
 
 export function getStaticPaths() {
   return langs.flatMap((lang) =>
@@ -10,4 +10,4 @@ export function getStaticPaths() {
 }
 const { lang } = Astro.props;
 ---
-<Redirect to={url(`${lang}/${caseStudyCategory}`)} lang={lang} label={categoryName(caseStudyCategory, lang)} />
+<Redirect to={url(`${lang}/work`)} lang={lang} label={navGroups.work.name[lang]} />

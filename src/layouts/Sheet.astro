@@ -6,7 +6,7 @@ import Locator from '../components/Locator.astro';
 import Contours from '../components/Contours.astro';
 import Comments from '../components/Comments.astro';
 import MapEmbed from '../components/MapEmbed.astro';
-import { series as seriesNames, site, caseStudyCategory, type Lang } from '../config/site';
+import { series as seriesNames, site, navGroups, type Lang } from '../config/site';
 import { t, url, translations, related, categoryName, sectorName, tagName, formatDate, type Item } from '../lib/content';
 
 interface Props { item: Item; pool: Item[] }
@@ -29,7 +29,7 @@ const coord = d.regions?.[0] && `${dms(d.regions[0].lat, 'N', 'S')} ${dms(d.regi
 const sheetKind = kind === 'projects' ? t(lang, 'sheet.project') : kind === 'posts' ? t(lang, 'sheet.post') : null;
 const legend = kind === 'projects'
   ? [
-      { href: url(`${lang}/${caseStudyCategory}`), label: categoryName(caseStudyCategory, lang), attr: { 'data-cat': caseStudyCategory } },
+      { href: url(`${lang}/work`), label: navGroups.work.name[lang], attr: { 'data-cat': 'geospatial-ai' } },
       { label: sectorName(d.sector, lang), attr: {} },
     ]
   : kind === 'posts'
@@ -60,7 +60,7 @@ const jsonld = kind === 'pages' ? undefined : {
   mainEntityOfPage: new URL(url(`${lang}/${path}`), Astro.site).href,
 };
 ---
-<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? caseStudyCategory : kind === 'pages' ? key : d.categories?.includes('ai-projects') ? 'ai-projects' : d.categories?.[0]}>
+<Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? 'work' : kind === 'pages' ? key : d.categories?.includes('ai-projects') ? 'builds' : 'writing'}>
   <div class="wrap">
     {(coord || kind !== 'pages') && (
       <div class="sheet-collar collar" style="justify-content:flex-end">
