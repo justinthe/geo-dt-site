@@ -32,6 +32,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A9. RekrutOps: A Recruiting Assistant That Asks Before It Acts
 - A10. The Agentic SDLC on a Small Team: Where My Pipeline Helped and Where It Didn't
 - A11. Why I Used a Graph, Not a Script, to Triage Fire Hotspots
+- A12. From Docker Compose to Kubernetes: Packaging a Local RAG App for Production
 
 ---
 
@@ -2255,4 +2256,148 @@ published: 2026-11-07
 updated: null
 comments: true
 map: false
+```
+
+---
+
+## A12. From Docker Compose to Kubernetes: Packaging a Local RAG App for Production
+
+*GeoScholar ran as a few containers on one desktop. This is the work to ship it on Kubernetes with the delivery path a team would use: tests and builds on every commit, infrastructure in code, and a dashboard for response time.*
+
+GeoScholar answers questions over 405 indexed arXiv papers on remote sensing and geospatial AI, with citations to the source papers. The first version and its evaluation are in [A8](#). Since then the corpus has grown from 399 papers to 405, and the collection now holds 19,996 chunks. Until now the app ran as Docker Compose services on one desktop. The code already existed, so the work was the delivery path, not new features. The tools in the path are GitHub Actions, Docker, k3d (Kubernetes inside Docker), OpenTofu, Helm, Prometheus and Grafana, and Ollama with an open model.
+
+This is production-shaped, not production. It has one API replica, no login, and no public load balancer, and the cloud run used a small model. The cloud cluster has been deleted.
+
+Most of the gaps in my own experience were the same ones: Kubernetes, CI/CD, infrastructure as code and production monitoring. I closed them on an app I had already built.
+
+![Demo recording of the GeoScholar interface](images/geoscholar-production/geoscholar_demo.gif "The GeoScholar interface, from the earlier release.")
+
+### Architecture
+
+```mermaid
+flowchart TD
+    Dev[Developer push] --> CI[GitHub Actions: test, build, push images]
+    CI --> GHCR[(Container registry)]
+    subgraph Local k3d cluster
+        API[geoscholar-api, 1 replica] --> QD[(Qdrant, papers_c300)]
+        UI[geoscholar-ui] --> API
+        PROM[Prometheus] -->|scrapes /metrics| API
+        GRAF[Grafana dashboard] --> PROM
+    end
+    API --> OL[Ollama: llama3.1:8b, outside the cluster]
+    GHCR -.->|images| API
+```
+
+On the local cluster, the API, UI and Qdrant run inside k3d, and Ollama stays outside it on the GPU. Ollama is reached over the Docker network that Compose created, so the cluster needs no GPU passthrough, which is awkward to set up in k3d. On GKE, Ollama ran as a pod instead (see below).
+
+### What I built, in order
+
+1. **Tooling:** k3d 5.9.0, kubectl 1.37, Helm 4.3 and OpenTofu 1.13, installed to a user bin folder with no root access.
+2. **App hardening:** a `/metrics` endpoint (request latency by route template, pipeline stage latency, query outcomes, token counts), a `/ready` endpoint that returns 503 until Qdrant and Ollama answer, and a feature flag for ingestion. Seven tests pass without loading PyTorch.
+3. **CI:** a GitHub Actions workflow with a test job, a build job for pull requests (no push) and a push job for `main` only. Images go to GHCR, tagged with the commit SHA. Only the push job can write packages. Every third-party action is pinned to a commit SHA.
+4. **Helm chart:** API and UI deployments, a config map, a cache volume, a ServiceMonitor for Prometheus, and a Grafana dashboard shipped as a config map. The API runs as one replica with the `Recreate` strategy, because job state and the BM25 index live in memory.
+5. **Infrastructure as code:** two OpenTofu roots. One creates the k3d cluster; the other installs the platform (Qdrant, kube-prometheus-stack and the chart). A Makefile wraps `up`, `down`, `deploy` and `pf` (port-forward).
+6. **Data load:** a script snapshots the 19,996-point collection from the Compose Qdrant, uploads it into the cluster and restarts the API.
+7. **Load test:** a k6 script, run from the official k6 image.
+
+### Results
+
+- **Local cluster:** the platform comes up, the API reports `ok`, Qdrant and Ollama are reachable, and all 19,996 chunks are loaded.
+- **Answers:** two corpus questions returned HTTP 200 with citations. "What is GeoScholar?" was refused, which is expected: the corpus is research papers, not the project's own documentation.
+- **Smoke test (1 virtual user, 3 requests):** all returned HTTP 200. p50 8.4 s, p95 9.5 s. Three requests are not a benchmark.
+- **Baseline (1 virtual user, 5 minutes):** 38 requests, 0 HTTP failures. p50 7.9 s, p95 9.7 s, 0.13 requests per second. 1 of 38 refused (2.6%).
+- **Headline run (4 virtual users, 10 minutes 15 seconds):** 150 requests, 0 HTTP failures. p50 16.4 s, p95 19.3 s, 0.24 requests per second. 9 of 150 refused (6%).
+- **Load test conditions:** k6 against the cluster API through a port-forward, using the eval questions, with llama3.1:8b on the RTX 3060 through Ollama, run on 2026-11-11 with hybrid retrieval and reranking. The refusal count includes questions that should be refused, so it is not an error rate.
+- **CI and registry:** PR #1 is merged and the images are public on GHCR.
+- **Cloud deployment:** on 2026-11-12, from the merged images, on GKE (details below). The API reported `ok` with all 19,996 chunks loaded. I did not measure cloud latency and ran no cloud load test.
+
+At 4 virtual users, p50 roughly doubles (7.9 s to 16.4 s), and throughput rises 1.85 times (0.13 to 0.24 requests per second), not 4 times. The requests share one GPU. I did not check how Ollama schedules them, so I can't say more than that.
+
+![GeoScholar Grafana dashboard: six panels with data](images/geoscholar-production/grafana_dashboard.png "The Grafana dashboard after the load runs: request rate, latency by route, stage latency, queries by outcome, and tokens by kind.")
+
+**Refusals.** On the local cluster with the 8B model, I ran two sequential sweeps over all 99 eval questions, one request each, and every request returned HTTP 200. In the first sweep 11 were refused: all 8 unanswerable questions (8 of 8), and 3 of 91 answerable ones. Those three were g-2607.13192, g-2609.00814 and m09. The second sweep came after a machine reboot and a cluster rebuild. It refused 8, all unanswerable, and none of the 91 answerable questions.
+
+I then repeated the three answerable questions four times each. g-2607.13192 was never refused. g-2609.00814 was refused in 1 of 4 runs and m09 in 2 of 4. The gold paper was retrieved on every run. For m09 it ranked last of the five sources.
+
+Refusal is decided only by the model. The API marks a response as refused when the answer contains "could not find this in the indexed papers". There is no retrieval-score threshold. My hypothesis is that this phrase check misfires when the model writes an answer and also appends the refusal sentence. I have not verified that. The cause of the intermittent refusals is not established, and the sample is small.
+
+The retrieval chart below comes from the earlier evaluation, before the production work. It gives context, not a production result.
+
+![Recall at 5 by retrieval configuration, 91 questions, 300-token chunks, from the earlier evaluation](images/geoscholar-production/retrieval_results.png "Retrieval quality from the earlier evaluation: 91 questions, 300-token chunks. Latency labels are per query.")
+
+An in-process timing from the earlier work (p50 4,454 ms) was taken without the HTTP layer, with the GPU in the same process. It is not comparable with the cluster numbers, so this article reports HTTP numbers only.
+
+### Problems, and what each taught me
+
+**The model name is a silent dependency.** The chart defaulted to `qwen2.5:0.5b`, which my desktop Ollama does not have. The API pod was alive, the logs were clean, and `/ready` returned 503 forever. The fix was to make the model a per-environment variable. A readiness check that depends on an exact model name needs that name from configuration, not a default.
+
+**A failed Helm release blocks re-apply.** The first apply failed partway, because the readiness check never passed. The next apply refused to create the release with `cannot re-use a name that is still in use`. A failed release has to be cleared before the infrastructure code can recreate it.
+
+**A pipe can hide a failure.** One background task reported success, but its exit code was masked by a pipe to `tail`. The real error was in the log. Check the exit code itself, or set `pipefail`.
+
+**Zero requests can look like success.** The first load runs made about 38 million iterations at about 2 microseconds each. The loop made no HTTP calls, and the summary step crashed on a missing metric, so no result file was written. My first guess, an empty question list in the container, was wrong: the files loaded. I have not established the full cause. The fix: the script now errors when it makes zero requests, and I check the request count before I trust any number.
+
+**A transient `degraded` reading.** One smoke run showed `qdrant: false` on `/health`. Later reads were healthy, and the logs showed no errors. The bad reading was probably taken during a pod rollout; I did not confirm that. Note the health state next to every benchmark, and rerun when it is not clean.
+
+**Ingestion does not belong in the cluster.** Ingestion needs GROBID and a writable paper database, and the chart provides neither. I disabled the route with a flag, so the cluster stays read-only.
+
+**Shared GPU.** The desktop GPU (an RTX 3060 with 12 GB) also serves two other projects' Ollama containers. For the load runs I stopped those two and restarted them afterwards. That needs a written record of which containers were running first.
+
+**A reboot broke the cluster.** The machine rebooted, which cleared the temporary folder and left the k3s server inside the k3d container crash-looping. Restarting the cluster did not help. The cluster was disposable, so I deleted and recreated it, then reloaded the snapshot. Keep the rebuild path scripted, and keep raw results outside temporary folders.
+
+### Decisions I would make again
+
+- **Gate the cloud step.** I checked the account and set a budget alert before creating any resources.
+- **Headline HTTP numbers only.** Comparing an in-process timing with a cluster timing would have made a misleading improvement.
+- **Get the plan reviewed before the code.** An independent review of the plan caught state files that would have leaked a password, and a route that could not work in the cluster.
+
+### Running it on Google Kubernetes Engine
+
+![GeoScholar Grafana dashboard on GKE: six panels with data over the last hour](images/geoscholar-production/geoscholar_gke_grafana_dashboard.png "The Grafana dashboard on the GKE cluster after test queries. Six panels show data: request rate, latency by route, stage latency, queries by outcome, tokens by kind.")
+
+![GeoScholar UI on GKE answering a land-cover question; the sources panel shows 0 cited](images/geoscholar-production/geoscholar_gke_ui_answer.png "The web UI on the cloud cluster. The model gave no citation markers for this answer, so the sources are marked not cited.")
+
+**What ran.** A zonal GKE cluster in us-central1-a with one Spot e2-standard-4 node (4 vCPU, 16 GB), on GKE 1.36.4, running the same chart. Ollama ran as a pod, using the 0.5B model on CPU, because the 8B model did not fit the pod's memory limit. I reached the cluster through kubectl and port-forward. There was no public load balancer.
+
+**Citations failed on the cloud model.** For one land-cover question the answer named two datasets, the UI showed 5 retrieved and 0 cited, and three repeat runs returned no `[S#]` markers. The likely cause is that the 0.5B model does not follow the citation format. I have not tested that. Local answers with the 8B model did carry citations, so citations depend on the model.
+
+**How.** The same OpenTofu platform root as the local cluster, in a separate workspace (`gke`), so the two states do not mix. A small change added an in-cluster Ollama switch. The data load used the same snapshot script.
+
+**Cost.** The trial billing account had free-trial credit. I set a budget alert before creating resources, at 5 USD. I entered it in Indonesian rupiah (Rp90,917) from an estimated rate. An alert does not cap spend. At about 2 USD a day for a running cluster, a 5 USD budget is used up in two to three days. The estimate below assumes 5 users at 3 hours a day, about 4,500 questions a month. Prices are us-central1 list prices read from Google's pricing pages on 2026-11-12, which show no last-updated date.
+
+| Option | Model | Estimated monthly cost |
+|---|---|---|
+| Own desktop | 8B | about 8 USD in electricity (placeholder rate of 0.15 USD per kWh) |
+| GKE CPU, Spot node | 0.5B | about 80 USD, including a load balancer |
+| GKE CPU, on-demand | 0.5B | about 120 USD |
+| GKE GPU | 8B | about 105 USD, plus the GPU host VM, which I did not price |
+
+The desktop figure uses rough draw figures of 150 W active and 60 W idle. The GKE totals assume the free-tier credit covers the 73 USD cluster management fee. The 30 questions per user per day is my assumption, so change it if your usage differs.
+
+For a LAN-only team of five, the desktop is the cheapest option, with the same answer quality as the GPU option. If the app must be reachable from outside, it needs a login first, since the API has none today. The GPU option then keeps the 8B answer quality. The CPU option is cheaper but gives weaker answers.
+
+**Status.** The cluster is deleted. I removed its three leftover persistent disks by hand. Nothing from GKE is running.
+
+### What is next
+
+The load numbers and the refusal sweep are done. The refusal cause is not. Open items:
+
+- Test whether a larger model on GKE, or a citation check, fixes the missing citation markers. This needs the cluster recreated.
+- Find the cause of the intermittent refusals, starting with a larger repeat run.
+- Run the fresh-clone check (`make up` from scratch).
+
+### Site metadata
+
+```yaml
+title: "From Docker Compose to Kubernetes: Packaging a Local RAG App for Production"
+lang: en
+translationKey: geoscholar-production
+categories: [ai-projects]
+tags: [kubernetes, ci-cd, rag, remote-sensing, observability, infrastructure-as-code]
+summary: "GeoScholar, a local RAG app over 405 remote sensing papers, moved to a production-shaped setup: CI, Helm, OpenTofu, k3d, GKE and Prometheus, with the measured results and what went wrong."
+published: 2026-11-12
+updated: null
+comments: true
+map: false
+cover: cover.png
 ```
