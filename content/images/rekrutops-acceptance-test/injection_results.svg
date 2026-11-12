@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 330" font-family="sans-serif" font-size="14">
+<rect width="800" height="330" fill="#ffffff"/>
+<text x="20" y="28" font-size="17" font-weight="bold" fill="#222">Holdout injection results (240 pairs, 40 fresh payloads)</text>
+<g fill="#222"><text x="20" y="75">Blocked share (floor 90%)</text><text x="20" y="145">In shortlist (limit 0)</text><text x="20" y="215">False positives (limit 0)</text><text x="20" y="285">Max uplift in points (limit 10)</text></g>
+<g fill="#eee" stroke="#bbb"><rect x="260" y="55" width="400" height="28"/><rect x="260" y="125" width="400" height="28"/><rect x="260" y="195" width="400" height="28"/><rect x="260" y="265" width="400" height="28"/></g>
+<rect x="260" y="55" width="363.2" height="28" fill="#555"/>
+<rect x="260" y="265" width="236.8" height="28" fill="#b00020"/>
+<g stroke="#222" stroke-width="2"><line x1="620" y1="48" x2="620" y2="90"/><line x1="365" y1="258" x2="365" y2="300" /></g>
+<g fill="#222" font-size="13"><text x="668" y="75">90.8% (218/240)</text><text x="672" y="145">0</text><text x="672" y="215">0</text><text x="672" y="285" fill="#b00020" font-weight="bold">22.5 FAILS</text></g>
+<text x="260" y="320" font-size="12" fill="#555">Bar scale for uplift: 0 to 38 points across the track; vertical tick = limit of 10.</text>
+</svg>
