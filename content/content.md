@@ -1774,7 +1774,7 @@ draft: true
 
 *An internal question-answering tool I built at work, and how I measured whether its answers can be trusted.*
 
-GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 399 recent remote sensing papers. Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models, and the code is on [GitHub](https://github.com/justinthe/geoscholar). I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of questions (R@5 0.972).
+GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 405 recent remote sensing papers (399 downloaded by the system, 6 added by hand). Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models, and the code is on [GitHub](https://github.com/justinthe/geoscholar). I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of questions (R@5 0.972).
 
 <figure><video src="/geo-dt-site/geoscholar/demo.mp4" poster="/geo-dt-site/geoscholar/cover.png" autoplay muted loop playsinline aria-label="GeoScholar answering a question with cited sources"></video><figcaption>Asking GeoScholar a question. The answer cites its sources as [S1], [S2] and so on, and the app shows each one as a paper ID and section. A question the papers can't answer gets a fixed refusal.</figcaption></figure>
 
@@ -1782,7 +1782,7 @@ GeoScholar is an internal tool I built for work. Colleagues ask a question in pl
 
 | | |
 | --- | --- |
-| **Papers** | 399 papers from arXiv (a free public archive where researchers post papers), in the computer vision and image-processing categories, cut into 19,650 text pieces |
+| **Papers** | 405 papers from arXiv (a free public archive where researchers post papers), in the computer vision and image-processing categories: 399 downloaded by the system and 6 added by hand. The evaluation below used the first 399, cut into 19,650 text pieces |
 | **Tools** | Qdrant (a search database), GROBID (a program that reads PDFs and finds their sections), bge-small-en-v1.5 (a model that turns text into numbers that capture its meaning), bge-reranker-base (a model that re-sorts search results), Llama 3.1 8B (the open language model that writes the answers), Ollama (a free program that runs language models on your own computer), FastAPI and Streamlit (the web service and the app screen), Docker Compose (starts everything with one command) |
 | **Hardware** | One desktop graphics card (RTX 3060, 12 GB of memory) |
 | **Test set** | 99 questions: 91 the papers can answer and 8 they can't |
@@ -1845,7 +1845,7 @@ flowchart LR
 
 ### Ingestion
 
-The run fetched 400 papers and indexed 399, because one PDF download returned a 404. GROBID parsed all 399 papers with no fallback, giving 19,650 text pieces (49 per paper on average). The index stage took about 14 minutes.
+The run fetched 400 papers and indexed 399, because one PDF download returned a 404. GROBID parsed all 399 papers with no fallback, giving 19,650 text pieces (49 per paper on average). The index stage took about 14 minutes. The collection has since grown to 405 papers, with 6 added by hand.
 
 I compared GROBID with PyMuPDF, a simpler PDF-reading library, on 5 sampled papers. PyMuPDF keeps all the text but returns one flat block with no headings. GROBID gives usable sections, but in 2 of the 5 papers the abstract came out as figure-caption text. I chose GROBID so I could cut text pieces by section, and noted the abstract problem as a fix to make.
 
@@ -1913,7 +1913,7 @@ lang: en
 translationKey: geoscholar-rag
 categories: [ai-projects]
 tags: [rag, remote-sensing, evaluation, internal-tools]
-summary: "An internal tool that answers questions from 399 remote sensing papers with cited sources, and how I measured whether its answers can be trusted."
+summary: "An internal tool that answers questions from 405 remote sensing papers with cited sources, and how I measured whether its answers can be trusted."
 published: 2026-10-26
 updated: null
 comments: true
@@ -2037,7 +2037,7 @@ cover: cover.png
 
 *What happened when I ran two internal apps through an AI-assisted build process, phase by phase, and what I checked with numbers instead of by feel.*
 
-GeoScholar is an internal tool that answers questions from 399 research papers. To test its search, I used two sets of questions. I generated 73 of them from the papers' own text. I wrote 18 by hand, the way a colleague would ask. A search passes a question when the right paper shows up in its top 5 results.
+GeoScholar is an internal tool that answers questions from 405 research papers (399 downloaded by the system, 6 added by hand). To test its search, I used two sets of questions. I generated 73 of them from the papers' own text. I wrote 18 by hand, the way a colleague would ask. A search passes a question when the right paper shows up in its top 5 results.
 
 On the generated questions, plain keyword search (called BM25) passed all 73, a score of 1.000. That matched my final setup and was faster. On my 18 hand-written questions, the same search scored 0.720, against 0.870 for the setup I chose, which also searches by meaning. The first number misled because a generated question reuses the wording of the passage it came from, and keyword search is built to match exact words. My own questions rephrase things, and that is where it fails. If I had trusted the first number, I would have kept the simpler search and it would have missed more of the questions people ask.
 
@@ -2265,7 +2265,7 @@ map: false
 
 *GeoScholar ran as a few containers on one desktop. This is the work to ship it on Kubernetes with the delivery path a team would use: tests and builds on every commit, infrastructure in code, and a dashboard for response time.*
 
-GeoScholar answers questions over 405 indexed arXiv papers on remote sensing and geospatial AI, with citations to the source papers. The first version and its evaluation are in [A8](#). Since then the corpus has grown from 399 papers to 405, and the collection now holds 19,996 chunks. Until now the app ran as Docker Compose services on one desktop. The code already existed, so the work was the delivery path, not new features. The tools in the path are GitHub Actions, Docker, k3d (Kubernetes inside Docker), OpenTofu, Helm, Prometheus and Grafana, and Ollama with an open model.
+GeoScholar answers questions over 405 indexed arXiv papers on remote sensing and geospatial AI, with citations to the source papers. The first version and its evaluation are in [A8](#). Since then the corpus has grown to 405 papers (399 downloaded by the system, 6 added by hand), and the collection now holds 19,996 chunks. Until now the app ran as Docker Compose services on one desktop. The code already existed, so the work was the delivery path, not new features. The tools in the path are GitHub Actions, Docker, k3d (Kubernetes inside Docker), OpenTofu, Helm, Prometheus and Grafana, and Ollama with an open model.
 
 This is production-shaped, not production. It has one API replica, no login, and no public load balancer, and the cloud run used a small model. The cloud cluster has been deleted.
 
