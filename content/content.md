@@ -2480,4 +2480,5 @@ published: 2026-11-12
 updated: null
 comments: true
 map: false
+cover: cover.png
 ```
