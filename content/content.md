@@ -34,6 +34,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A11. Why I Used a Graph, Not a Script, to Triage Fire Hotspots
 - A12. From Docker Compose to Kubernetes: Packaging a Local RAG App for Production
 - A13. Is This CV-Screening Tool Safe and Correct Enough to Release?
+- A14. GeoAsk: Asking a PostGIS Database Questions in Plain Language
 
 ---
 
@@ -2482,3 +2483,105 @@ comments: true
 map: false
 cover: cover.png
 ```
+
+---
+
+## A14. GeoAsk: Asking a PostGIS Database Questions in Plain Language
+
+*A local model writes the SQL, every answer shows its query, and accuracy is measured on questions the model had not seen.*
+
+Ask "how many clinics are within 3 km of Kota Cimahi?" and the answer is a PostGIS query with a distance filter, a lookup of the place, a join and a count. Writing that query takes PostGIS knowledge. A language model can write it too. The trouble is that a wrong query that runs returns a clean number, and nothing on the screen says it is wrong.
+
+GeoAsk is my attempt to make that safer and to measure it. Every answer shows the SQL it ran. Unsafe SQL is blocked before it reaches the database. And the project reports an accuracy figure on questions the model was not tuned on. That figure is low, and the project reports it anyway.
+
+### The problem
+
+Spatial questions are where text-to-SQL gets hard. "Within 3 km" needs a metric projection. A place name needs a lookup in a table of administrative areas. "Clinic" means one tag in one table, not a word that appears in a column. A 7B model gets many of these wrong, and the wrong answers look like answers.
+
+### What it does
+
+A local model, qwen2.5:7b-instruct run through Ollama, receives a description of the schema generated from the database catalog. It writes SQL for a question asked in English or Bahasa Indonesia, runs it, and answers.
+
+The data covers West Java and DKI Jakarta: OpenStreetMap roads, rivers, buildings, schools and health facilities, geoBoundaries provinces and regencies or cities, and a WorldPop population grid. There are no villages, no flood layer and no time series. Questions about those get refused, with a reason.
+
+![The web page answering how many schools are within 2 km of a river: the count is 13022, and the SQL sits behind a Show SQL link](images/geoask/02-schools-answer.jpg "The web interface. The answer is a count, and the SQL behind it is one click away.")
+
+### How it is built
+
+The agent is a LangGraph loop: write SQL, validate it, run it, check the result, answer.
+
+- The validator uses sqlglot to parse the SQL. Only a single SELECT passes. DDL, DML, COPY, multiple statements and functions outside an allowlist are rejected.
+- Queries run as a database role that cannot write, with a 10-second statement timeout and a row cap.
+- If the schema cannot answer a question (rainfall, villages, floods), the agent returns a reason and no rows.
+- On a SQL error the agent retries up to twice with the error message, then reports failure.
+- There are three interfaces: a command-line tool, a FastAPI web page with a table and a map, and an MCP tool called `ask_geo`. Every question is logged to SQLite.
+
+Validation and the read-only role do the safety work. They do not check meaning.
+
+### How it was tested
+
+Each evaluation set has 60 questions: 54 answerable and 6 that should be refused. There are also 25 adversarial prompts. The gold SQL is hand-written. An answer counts as correct when its result set equals the gold result set.
+
+| Run | Execution accuracy | What it means |
+|---|---|---|
+| Baseline, v1 set | 24.1% (13/54) | First run, untuned prompt |
+| v2, same v1 set | 40.7% (22/54) | After fixes tuned on those failures. Not held out. |
+| v3, new set | 29.6% (16/54) | New questions, written after tuning. The number I would quote. |
+
+The v2 figure is the one to read with care. I tuned the prompt on the v1 failures and then scored it on the same questions. The jump from 24.1% to 40.7% is partly real, since SQL errors fell from 25 to 3, and partly fitting to the test set. The v3 set was written after the tuning, and it shows how much of the gain carried over: some of it, not all.
+
+On v3, refusal had 100% precision (5 of 5) and 83.3% recall (5 of 6). Median latency was 2.4 seconds and the 95th percentile was 5.5 seconds.
+
+On the adversarial prompts, the block rate was 80% (20 of 25) in every run. That uses a strict rule: any executed SQL counts as unblocked. The five unblocked v3 prompts produced only harmless read-only SELECTs, and no unsafe SQL ran in any run. Under the rule as I set it, the 100% release gate still fails. I kept the rule rather than change it after seeing the results.
+
+### What failed
+
+v3 had 39 failures. By the automatic failure class:
+
+- Wrong table (16): mostly proximity questions where the model ignored the named place and used an invented coordinate instead of looking the place up in `admin_area`. The label is a heuristic. Counted directly from the raw results, 17 of the 38 wrong answers contain hard-coded coordinates.
+- Wrong filter (13): right tables, wrong rows: a bad radius, the wrong admin level, a join that returns nothing, a missing unit conversion, or a row count from a join that was never aggregated.
+- Other (9): the idea is often right, but the returned columns differ from the gold query, such as an extra distance column or a missing count. Strict grading fails these.
+- Wrong refusal (1): a question that should have been refused got an answer with an invented filter.
+
+The earlier runs failed in different proportions. The baseline had 43 failures, 25 of them SQL errors. The v2 run had 33, most of them wrong filters.
+
+By category on v3, aggregation was right 75.0% of the time, joins 41.7%, proximity 8.3% (2 of 24) and ambiguous place names 0% (0 of 6). The model never resolved an ambiguous name to the reading I had in mind, and some coordinates had the wrong sign.
+
+Two gold queries in the v1 set, q045 and q048, do not execute. They count as wrong in the baseline and v2 runs.
+
+### What I learned
+
+- Validation and a read-only role stop harmful SQL. They cannot catch wrong SQL that runs. Only a held-out test set does that.
+- Tuning on the test set gave a number that did not hold up. Writing a fresh set was worth the time.
+- A strict harness rule gives a worse number and a more honest one.
+- A 7B model needs the place lookup made easy, because it would rather guess a coordinate.
+
+### What next
+
+- Proximity fix: give the model a place-resolution step, or a tested template that turns a name into an `admin_area` centroid. This targets the largest failure class.
+- Model tuning: fine-tune a 1 to 4 billion parameter model on logged questions, then compare it with the default model through the same release gate, on a frozen held-out set.
+- Clearer grading: fix the two broken gold queries and decide how to treat extra columns, in a new versioned test set.
+
+The test set files are frozen and hashed, so each number can be checked.
+
+### Data and attribution
+
+Map data © OpenStreetMap contributors, available under the Open Database Licence (ODbL). Boundaries: geoBoundaries, licence to be confirmed from the geoBoundaries metadata. Population: WorldPop 2020.
+
+### Site metadata
+
+```yaml
+title: "GeoAsk: Asking a PostGIS Database Questions in Plain Language"
+lang: en
+translationKey: geoask
+categories: [ai-projects]
+tags: [gis, postgis, text-to-sql, evaluation, local-llm]
+summary: "A local model writes PostGIS SQL for spatial questions about West Java and Jakarta. Unsafe SQL is blocked and every answer shows its query. On a fresh 54-question set, 16 answers are correct (29.6%)."
+published: 2026-11-14
+updated: null
+comments: true
+map: false
+cover: cover.jpg
+```
+
+---
