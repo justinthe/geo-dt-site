@@ -1775,7 +1775,7 @@ draft: true
 
 *An internal question-answering tool I built at work, and how I measured whether its answers can be trusted.*
 
-GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 405 recent remote sensing papers (399 downloaded by the system, 6 added by hand). Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models, and the code is on [GitHub](https://github.com/justinthe/geoscholar). I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of questions (R@5 0.972).
+GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 405 recent remote sensing papers (399 downloaded by the system, 6 added by hand). Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models. I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of questions (R@5 0.972).
 
 <figure><video src="/geo-dt-site/geoscholar/demo.mp4" poster="/geo-dt-site/geoscholar/cover.png" autoplay muted loop playsinline aria-label="GeoScholar answering a question with cited sources"></video><figcaption>Asking GeoScholar a question. The answer cites its sources as [S1], [S2] and so on, and the app shows each one as a paper ID and section. A question the papers can't answer gets a fixed refusal.</figcaption></figure>
 
@@ -1787,7 +1787,6 @@ GeoScholar is an internal tool I built for work. Colleagues ask a question in pl
 | **Tools** | Qdrant (a search database), GROBID (a program that reads PDFs and finds their sections), bge-small-en-v1.5 (a model that turns text into numbers that capture its meaning), bge-reranker-base (a model that re-sorts search results), Llama 3.1 8B (the open language model that writes the answers), Ollama (a free program that runs language models on your own computer), FastAPI and Streamlit (the web service and the app screen), Docker Compose (starts everything with one command) |
 | **Hardware** | One desktop graphics card (RTX 3060, 12 GB of memory) |
 | **Test set** | 99 questions: 91 the papers can answer and 8 they can't |
-| **Code** | [github.com/justinthe/geoscholar](https://github.com/justinthe/geoscholar) |
 
 ### Results in brief
 
