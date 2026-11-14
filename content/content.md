@@ -2584,3 +2584,184 @@ cover: cover.jpg
 ```
 
 ---
+
+## A15. Tuning a 1.5B model for SQL: what the gate let through
+
+*A 1.5B model fine-tuned on English questions is faster and lighter than the 7B default. It is not more skilled. The release gate caught the test-setup mismatch that had flipped the first verdict.*
+
+GeoAsk turns plain-language questions into PostGIS SQL. The default model is a 7B model (`qwen2.5:7b-instruct`) running on a local GPU. It is useful but slow: median about 2.5 seconds per question, and about 5 GB of GPU memory. The question was whether a 1 to 4B open model could match its accuracy while being faster and lighter. This article covers how we tried, what the test set showed, and why one result was wrong for a while.
+
+The short answer: a fine-tuned 1.5B model now answers English questions. It is faster and uses about a quarter of the memory. It was not trained into the skill of writing SQL. Most of its gain came from learning the output format and the refusal habit.
+
+### The gate
+
+Before training, we wrote the rules for a replacement. A tuned model would replace the default only if it met all four:
+
+- at least as accurate on a frozen test set;
+- at least as precise on refusals;
+- blocked all unsafe SQL;
+- faster or lighter.
+
+Two rules shaped everything after. A prompt counts as blocked if no unsafe SQL executed. Strict scoring, where any executed SQL counts as unblocked, is still reported. Test sets are frozen with SHA-256 hashes before use. Sets we had already read for failure patterns could not count as held out.
+
+### The base model
+
+We used Qwen2.5-1.5B-Instruct. Its licence is Apache 2.0, so a fine-tune can be published. The 3B Qwen model uses a non-commercial research licence, so we ruled it out.
+
+### Training data: templates for the SQL, a teacher for the questions
+
+The SQL is correct by construction. We filled templates from the real database: admin names, facility types, river names, radii. A local teacher model (`qwen2.5:7b`) wrote only the natural-language questions. Each pair had to pass four filters:
+
+1. the SQL validator;
+2. a read-only run;
+3. a non-empty result, unless it was a deliberate zero-row case;
+4. the slot values still present in the question.
+
+Leakage checks ran against every eval set: exact match, near-duplicate match (character 3-gram Jaccard at 0.80, fixed in advance), and gold-SQL match. The v2 build removed about 350 pairs this way.
+
+Each training example is one chat. The system prompt carries the rules, the schema text and the place facts, roughly 2,000 tokens. The user sends a question. The assistant replies with JSON holding `sql`, `refuse`, `reason` and `assumption`. Loss is computed only on the reply, so the model learns to write the JSON, not to repeat the schema.
+
+| | tuned-v1 | tuned-v2 |
+|---|---|---|
+| Templates | 7 families | 9 families (F1 to F9), written to target known failures |
+| Training pairs | 2,210 | 1,180 |
+| Validation pairs | 261 | 90 |
+| Retry examples | about 10% | about 10% |
+| Training tokens | about 4.4 M | about 2.4 M |
+
+### The training method: QLoRA
+
+This is transfer learning. We did not train from scratch. The pretrained model already knows language and SQL. We adapted it to GeoAsk's schema and output format with QLoRA, which combines two ideas:
+
+- **Quantised base.** The pretrained weights load in 4-bit NF4 with double quantisation, so the 1.5B model fits in a few GB. The base weights are frozen.
+- **Low-rank adapters.** Rank-16 LoRA matrices are added to the q, k, v, o, gate, up and down projections. Only these train: about 18.5 million weights, roughly 1.2% of the model.
+
+```mermaid
+flowchart LR
+    A[Templates filled from the database] --> B[Teacher writes English questions]
+    B --> C[Filters: validator, read-only run, non-empty]
+    C --> D[Leakage checks: exact, near-duplicate, gold SQL]
+    D --> E[Train / validation split]
+    E --> F[QLoRA: frozen 4-bit base + LoRA adapter]
+    F --> G[Merge adapter into base]
+    G --> H[GGUF, Q4_K_M]
+    H --> I[Ollama model tuned-v2]
+```
+
+Shared settings for both runs: LoRA rank 16, alpha 32, dropout 0.05. The optimiser was paged 8-bit AdamW at learning rate 2e-4, with cosine decay and 3% warm-up. Effective batch size was 16. Seed 42. Training stopped early with patience 1 on validation loss.
+
+The training loop for one step looks like this:
+
+```mermaid
+flowchart LR
+    S[Batch of 16 examples] --> F1[Forward pass: base frozen, adapter active]
+    F1 --> L[Loss on the JSON reply only]
+    L --> B1[Backward pass: gradients for the adapter only]
+    B1 --> U[Optimiser updates adapter]
+    U --> V{End of epoch?}
+    V -- yes --> VAL[Validation loss; keep best adapter]
+    VAL --> ES{Loss rose?}
+    ES -- yes --> STOP[Stop]
+    ES -- no --> S
+    V -- no --> S
+```
+
+### Two runs
+
+| Run | Data | Schedule | Validation loss | Result |
+|---|---|---|---|---|
+| tuned-v1 | v1 | 417 steps, 3 epochs | 0.0169, 0.0071, 0.0066 | 5 h 8 min. Peak VRAM 9.8 GiB |
+| tuned-v2 | v2 | 222 planned; stopped after epoch 2 | 0.0599, 0.0643 | Best at epoch 1. 1 h 32 min. Peak VRAM 6.3 GiB |
+
+Validation losses cannot be compared across runs, because the validation sets differ. A low validation loss only says the model writes the expected JSON. It does not say the SQL is right. Accuracy came from separate frozen test sets.
+
+### Export: adapter to Ollama
+
+1. **Merge** the adapter into the 16-bit base.
+2. **Convert** to GGUF with llama.cpp.
+3. **Quantise** to Q4_K_M, the same as the default, so size and speed compare fairly.
+4. **Package** with a Modelfile that uses the base model's chat template and stop tokens. Without this, the JSON output breaks.
+5. **Register and smoke-test.** One question goes through the agent's prompt, and the four JSON keys must come back.
+
+The exported model is about 986 MB on disk, against about 4.8 GB for the default.
+
+### Results
+
+We ran each test set with temperature 0, JSON format, the same retry limit, timeout and row cap. Grading executes the gold SQL and the agent SQL read-only and compares the result sets. Zero-row golds count as correct only if the agent also returns zero rows.
+
+| Model | Test set | Facts in prompt | Correct | Accuracy |
+|---|---|---|---|---|
+| Default 7B | v6 | yes | 21/54 | 38.9% |
+| tuned-v2 | v6 | yes | 27/54 | 50.0% |
+| Default 7B | v7 | yes | 29/54 | 53.7% |
+| tuned-v2 | v7 | yes | 32/54 | 59.3% |
+
+Refusals on v7: the default had precision 3/3 and recall 3/6. tuned-v2 had precision 3/3 and recall 3/6. Both tuned models refuse more readily than the default. tuned-v1 caught every refusal but also refused answerable questions, so its precision fell to 6/9. That run failed the gate.
+
+Adversarial prompts: under the agreed rule, every model blocked 23/23. The validator and the read-only role did the work.
+
+Latency and memory:
+
+| Model | Median latency | p95 latency | Size or GPU use |
+|---|---|---|---|
+| Default 7B | 2.0 to 2.6 s | 5.1 to 6.2 s | about 4.8 GB |
+| tuned-v2 | about 0.8 s | 2.4 s | 2.0 GB total GPU use, against about 0.8 GB baseline |
+
+This is the one advantage that held on every run. The tuned model is about 2.5 times faster at the median.
+
+### The mistake that changed the answer
+
+The first verdicts said the tuned models failed. That was wrong. The models were trained with place and river facts in the system prompt. The harness scored them without those facts. The production app always includes them. The default was scored the same wrong way.
+
+When we re-ran with facts on, tuned-v2 moved from 17/54 to 27/54 on v6. On v7, the facts also raised the default from 25/54 to 29/54. The verdicts had to be corrected in the plan. The lesson: check that the test setup matches production before you read a result.
+
+### What the small model did not learn
+
+- **Named rivers.** On v6, the tuned model still dropped the river name in five proximity questions. The v2 data was written to fix this. The same weakness appeared on v7 with facts in place. Templates built from known failures did not transfer to new wording.
+- **Few-shot examples.** Six worked examples lifted the untuned 1.5B model from 10/54 to 13/54 on v7. That is far below the 7B's 29/54, so the small model lacks the skill, not just the examples.
+- **Named-place route.** A rule-based route for named-place questions gave a net gain of one question (30 against 29). That is within noise. It stays in the code, switched off.
+
+The gap is about the size of the gains. One English question is 3.7 points on a 27-question subset and 1.9 points on 54. A 3 to 6 question difference is a signal, not proof.
+
+### What we shipped
+
+English questions go to `tuned-v2:latest`. Bahasa Indonesia and everything else stay on the default. The routing sits in `config.yaml` under `models.by_language.en`. Remove that block and behaviour returns to the default.
+
+### Limits
+
+- **Bahasa Indonesia is untested.** The tuned model was trained on English only. Bahasa stays on the default.
+- **Two test sets, about 54 questions each.** The margin is 3 questions on v7 and 6 on v6. A third fresh set would help before relying on this.
+- **Summaries.** The tuned model writes the answer summaries too. We checked one by hand. A wider check is still needed.
+- **Refusal recall is low.** It is 2/6 on v6 and 3/6 on v7 for the tuned model. The default is no better.
+- **Memory was measured only for the tuned model**, against the default's file size. We did not take a like-for-like GPU measurement of the default.
+- **No seed repeat** of the training configuration. The plan allowed one.
+
+### Machine
+
+| Part | Specification |
+|---|---|
+| CPU | Intel Core i7-12700 (20 threads) |
+| RAM | 62 GB |
+| GPU | NVIDIA RTX 3060, 12 GB VRAM |
+| Driver | 580.178.04 |
+| Software | PyTorch 2.15.0 (CUDA 13.2), transformers 5.23.0, PEFT 0.21.3, TRL 1.18.0, bitsandbytes 0.50.2 |
+| Teacher (data only) | qwen2.5:7b-instruct via Ollama |
+
+Wall-clock time to a usable model: about 2 hours for tuned-v2 (18 minutes of data build, 1 h 32 min of training), and about 6 hours for tuned-v1. The default and the untuned base were not trained by us.
+
+### Site metadata
+
+```yaml
+title: "Tuning a 1.5B model for SQL: what the gate let through"
+lang: en
+translationKey: geoask-tuning-1-5b
+categories: [ai-projects]
+tags: [gis, postgis, text-to-sql, fine-tuning, evaluation, local-llm]
+summary: "A 1.5B model fine-tuned on English questions writes PostGIS SQL about 2.5 times faster than the 7B default, with a higher score on two frozen test sets. The default stays for Bahasa Indonesia."
+published: 2026-11-14
+updated: null
+comments: true
+map: false
+```
+
+---
