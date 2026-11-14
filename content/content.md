@@ -2587,9 +2587,9 @@ cover: cover.jpg
 
 ## A15. Tuning a 1.5B model for SQL: what the gate let through
 
-*A 1.5B model fine-tuned on English questions is faster and lighter than the 7B default. It is not more skilled. The release gate caught the test-setup mismatch that had flipped the first verdict.*
+*A 1.5B model fine-tuned on English questions is faster and lighter than the 7B default. It is not more skilled. Checking the test setup against production reversed the first verdict.*
 
-GeoAsk turns plain-language questions into PostGIS SQL. The default model is a 7B model (`qwen2.5:7b-instruct`) running on a local GPU. It is useful but slow: median about 2.5 seconds per question, and about 5 GB of GPU memory. The question was whether a 1 to 4B open model could match its accuracy while being faster and lighter. This article covers how we tried, what the test set showed, and why one result was wrong for a while.
+GeoAsk turns plain-language questions into PostGIS SQL. The default model is a 7B model (`qwen2.5:7b-instruct`) running on a local GPU. It is useful but slow: median about 2.5 seconds per question, and about 5 GB of GPU memory. The question was whether a 1 to 4B open model could match its accuracy while being faster and lighter. We tried, measured against frozen test sets, and found that one early verdict was wrong for a while.
 
 The short answer: a fine-tuned 1.5B model now answers English questions. It is faster and uses about a quarter of the memory. It was not trained into the skill of writing SQL. Most of its gain came from learning the output format and the refusal habit.
 
@@ -2633,8 +2633,8 @@ Each training example is one chat. The system prompt carries the rules, the sche
 
 This is transfer learning. We did not train from scratch. The pretrained model already knows language and SQL. We adapted it to GeoAsk's schema and output format with QLoRA, which combines two ideas:
 
-- **Quantised base.** The pretrained weights load in 4-bit NF4 with double quantisation, so the 1.5B model fits in a few GB. The base weights are frozen.
-- **Low-rank adapters.** Rank-16 LoRA matrices are added to the q, k, v, o, gate, up and down projections. Only these train: about 18.5 million weights, roughly 1.2% of the model.
+- Quantised base: the pretrained weights load in 4-bit NF4 with double quantisation, so the 1.5B model fits in a few GB. The base weights are frozen.
+- Low-rank adapters: rank-16 LoRA matrices are added to the q, k, v, o, gate, up and down projections. Only these train: about 18.5 million weights, roughly 1.2% of the model.
 
 ```mermaid
 flowchart LR
@@ -2677,11 +2677,11 @@ Validation losses cannot be compared across runs, because the validation sets di
 
 ### Export: adapter to Ollama
 
-1. **Merge** the adapter into the 16-bit base.
-2. **Convert** to GGUF with llama.cpp.
-3. **Quantise** to Q4_K_M, the same as the default, so size and speed compare fairly.
-4. **Package** with a Modelfile that uses the base model's chat template and stop tokens. Without this, the JSON output breaks.
-5. **Register and smoke-test.** One question goes through the agent's prompt, and the four JSON keys must come back.
+1. Merge the adapter into the 16-bit base.
+2. Convert to GGUF with llama.cpp.
+3. Quantise to Q4_K_M, the same as the default, so size and speed compare fairly.
+4. Package with a Modelfile that uses the base model's chat template and stop tokens. Without this, the JSON output breaks.
+5. Register and smoke-test. One question goes through the agent's prompt, and the four JSON keys must come back.
 
 The exported model is about 986 MB on disk, against about 4.8 GB for the default.
 
@@ -2717,9 +2717,9 @@ When we re-ran with facts on, tuned-v2 moved from 17/54 to 27/54 on v6. On v7, t
 
 ### What the small model did not learn
 
-- **Named rivers.** On v6, the tuned model still dropped the river name in five proximity questions. The v2 data was written to fix this. The same weakness appeared on v7 with facts in place. Templates built from known failures did not transfer to new wording.
-- **Few-shot examples.** Six worked examples lifted the untuned 1.5B model from 10/54 to 13/54 on v7. That is far below the 7B's 29/54, so the small model lacks the skill, not just the examples.
-- **Named-place route.** A rule-based route for named-place questions gave a net gain of one question (30 against 29). That is within noise. It stays in the code, switched off.
+- Named rivers: on v6, the tuned model still dropped the river name in five proximity questions. The v2 data was written to fix this. The same weakness appeared on v7 with facts in place. Templates built from known failures did not transfer to new wording.
+- Few-shot examples: six worked examples lifted the untuned 1.5B model from 10/54 to 13/54 on v7. That is far below the 7B's 29/54, so the small model lacks the skill, not just the examples.
+- Named-place route: a rule-based route for named-place questions gave a net gain of one question (30 against 29). That is within noise. It stays in the code, switched off.
 
 The gap is about the size of the gains. One English question is 3.7 points on a 27-question subset and 1.9 points on 54. A 3 to 6 question difference is a signal, not proof.
 
@@ -2729,12 +2729,12 @@ English questions go to `tuned-v2:latest`. Bahasa Indonesia and everything else 
 
 ### Limits
 
-- **Bahasa Indonesia is untested.** The tuned model was trained on English only. Bahasa stays on the default.
-- **Two test sets, about 54 questions each.** The margin is 3 questions on v7 and 6 on v6. A third fresh set would help before relying on this.
-- **Summaries.** The tuned model writes the answer summaries too. We checked one by hand. A wider check is still needed.
-- **Refusal recall is low.** It is 2/6 on v6 and 3/6 on v7 for the tuned model. The default is no better.
-- **Memory was measured only for the tuned model**, against the default's file size. We did not take a like-for-like GPU measurement of the default.
-- **No seed repeat** of the training configuration. The plan allowed one.
+- Bahasa Indonesia is untested. The tuned model was trained on English only. Bahasa stays on the default.
+- Two test sets, about 54 questions each. The margin is 3 questions on v7 and 6 on v6. A third fresh set would help before relying on this.
+- Summaries: the tuned model writes the answer summaries too. We checked one by hand. A wider check is still needed.
+- Refusal recall is low. It is 2/6 on v6 and 3/6 on v7 for the tuned model. The default is no better.
+- Memory was measured only for the tuned model, against the default's file size. We did not take a like-for-like GPU measurement of the default.
+- No seed repeat of the training configuration. The plan allowed one.
 
 ### Machine
 
