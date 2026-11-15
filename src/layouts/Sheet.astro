@@ -62,9 +62,9 @@ const jsonld = kind === 'pages' ? undefined : {
 ---
 <Base lang={lang} title={d.title} description={d.summary} path={path} available={available} image={og} type={kind === 'pages' ? 'website' : 'article'} jsonld={jsonld} noindex={item.fallback} nav={kind === 'projects' ? 'work' : kind === 'pages' ? key : d.categories?.includes('ai-projects') ? 'builds' : 'writing'}>
   <div class="wrap">
-    {(coord || kind !== 'pages') && (
+    {coord && (
       <div class="sheet-collar collar" style="justify-content:flex-end">
-        <span class="figure-num">{coord ?? formatDate(item.date, lang)}</span>
+        <span class="figure-num">{coord}</span>
       </div>
     )}
     <article class="neatline sheet" data-pagefind-body={item.fallback ? undefined : ''}>
@@ -85,7 +85,7 @@ const jsonld = kind === 'pages' ? undefined : {
         )}
         {kind !== 'pages' && (
           <div class="meta-row">
-            <span class="collar">{t(lang, 'meta.published')} <time datetime={item.date.toISOString()}>{formatDate(item.date, lang)}</time>{d.updated && <> · {t(lang, 'meta.updated')} <time datetime={d.updated.toISOString()}>{formatDate(d.updated, lang)}</time></>}</span>
+            {d.updated && <span class="collar">{t(lang, 'meta.updated')} <time datetime={d.updated.toISOString()}>{formatDate(d.updated, lang)}</time></span>}
             <span class="scalebar" title={`${item.minutes} ${t(lang, 'meta.reading')}`}>
               <span class="scalebar-bar" aria-hidden="true">{Array.from({ length: SCALE }, (_, i) => <i class={i < filled ? 'on' : undefined} />)}</span>
               <span class="collar">{item.minutes} {t(lang, 'meta.reading')}</span>
