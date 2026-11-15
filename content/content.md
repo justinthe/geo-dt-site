@@ -2765,3 +2765,114 @@ map: false
 ```
 
 ---
+
+
+## A16. A zero-cost river twin, and a change detector that scored zero
+
+The detector found no water change I could confirm. I still built the rest: a 3D viewer for one river site, four satellite dates on a slider, drone point clouds, detector output, and simulated sensors with alerts. The whole stack costs nothing to run, and every layer shows its source and licence. This article covers what it does, what it measured, what I got wrong along the way, and where it stops.
+
+![A drone point cloud of the river bars on top of Sentinel-2 imagery, with simulated sensor markers](images/sitetwin-river-twin/drone-view.jpg "Drone point cloud of the river bars, 2025-05-15, draped on Copernicus GLO-30 heights. Sensor markers are simulated.")
+
+### The result first
+
+The water-change detector predicted no water change in any of the 44 tiles it kept. Against hand-drawn truth, that is 0 true positives and 9 false negatives. With nine positives, precision and F1 are not meaningful, so I report counts and recall only. The honest label is **not scoreable**, and the viewer says the detector output is "not validated as accuracy".
+
+The viewer does show detector output. At the last epoch pair it lists 168 polygons across three classes with detections (flood scar and channel change, water change, landslide scar). Those are detections. They have not been checked against truth.
+
+### What it is
+
+One site: the river bars on the Rio Biguaçu at Antônio Carlos, Santa Catarina, Brazil. The reach is 5 by 3 km. A 200 by 150 m drone footprint sits inside it.
+
+The viewer has four controls:
+
+- A time slider with four Sentinel-2 dates: 2025-01-03, 2025-01-23, 2025-03-19 and 2025-05-18. The stops are placed by true date, not evenly.
+- A drone point cloud for the two drone captures, 2024-12-04 and 2025-05-15. At each stop the slider shows the nearest earlier drone date and says so.
+- A detector toggle with one class at a time.
+- A sensor panel with three simulated sensors and alerts.
+
+The flood fell between the two drone captures. Storm rainfall on 16 to 17 January 2025 is reported at 369 mm in 24 hours by NSC Total, citing state civil defence data. Other outlets give 391 mm in 24 hours and 434.8 mm in 48 hours. As of 15 November 2026 I could not reach the official Defesa Civil bulletin, so these figures are press-reported, not confirmed.
+
+![Timeline sweep across the four Sentinel-2 dates, drone view kept fixed](images/sitetwin-river-twin/timeline-sweep.gif "Stepping the slider from 2025-01-03 to 2025-05-18. The camera stays on the drone area.")
+
+### Data and licences
+
+Every layer names its source and licence in the footer:
+
+- Sentinel-2 L2A, tile T22JGQ, from the Element84 Earth Search mirror. The Copernicus download route returned 401 for my client, so I used the mirror. Terms: Copernicus Sentinel data terms.
+- Copernicus DEM GLO-30, a surface model from 2011 to 2015. Its heights do not match 2025 ground, and the viewer says so.
+- Two OpenAerialMap drone records, CC-BY 4.0 each. The licence check is a hard fail: a record whose licence is not exactly an allowed open licence is not used.
+- OpenStreetMap, ODbL 1.0.
+
+The write-up lists every record with its id and link. A check script fails if the write-up drifts from the data files.
+
+### The method, briefly
+
+The detector is deliberately simple:
+
+- Water from MNDWI, with an Otsu threshold.
+- Vegetation loss from an NDVI drop.
+- Slope from the DEM.
+- Morphological opening and closing to remove speckle.
+- A 20 metre tile, aligned to the Sentinel-2 grid. A tile counts as changed when at least 10 % of it is covered.
+
+The parameters are frozen in a config file before scoring. Two earlier water classifiers failed. A brightness-Otsu version on the drone orthophotos put 85 to 87 % of the scene in water. A k-means version misread the brown, sediment-laden water. I dropped both and used hand-drawn water polygons on the drone captures as truth. The truth is one person's drawing on one site and one epoch pair. The write-up says so, and the scoring makes no generalisation claim.
+
+![Sensor panel with simulated readings and firing alerts](images/sitetwin-river-twin/sensor-panel.png "Replay mode: values and alerts are simulated, labelled, and produced by the same rules file used by the live pipeline.")
+
+### Simulated sensors and alerts
+
+There are three simulated sensors: rainfall, water level and vibration. They run on a seeded 24-hour storm that totals 369 mm, the reported figure. Every value and every alert carries a SIMULATED DATA label.
+
+The alert thresholds are my assumptions, not measured site values. They live in one rules file. The live alerter and the hosted replay both read that file, so the rules are not duplicated in JavaScript. Four rules:
+
+- Rainfall above 30 mm/h: warning.
+- Water level above 3.0 m: critical.
+- Vibration RMS above 2.0 mm/s: warning.
+- Rainfall above 20 mm/h and water level rising by at least 0.05 m over ten samples: critical. This is the combined rule. It is meant to fire before the water-level threshold does, which is the point of having it.
+
+I measured alert delivery on the local stack: 200 alerts at 600 times simulation speed, p50 42 ms and p95 44 ms. The number is delivery latency, from the broker timestamp to the page handler, on one machine with one clock. It is not a network or hosted measurement. My first figure was 293 ms, and I discarded it. That run waited a fixed 250 ms before it stamped each sample, so the number mostly measured my own wait.
+
+### How it was built
+
+I built this with AI coding agents, with a human making the calls. The project followed a build plan with milestones M2 to M7. Each milestone had an exit check: a script or a measured number that had to pass before the next milestone started. For planning I used a planner agent, for code a coding agent, and for checks a test agent. I reviewed each step and reran the checks myself rather than trusting a summary.
+
+Some of the mistakes, in order of how much they cost:
+
+- A taper that made a cliff. The terrain grid tapered edge heights down to the minimum over eight cells. That made a cliff of about 380 metres at the reach edge, which showed as a green wall in the viewer. I removed the taper and regenerated the terrain. A strip at the reach edge is still visible in some camera positions, and I have not closed that issue.
+- A double-applied atmospheric offset. Earth Search flagged the second epoch as already corrected, but the pixel values said otherwise. The median water index for that epoch came out at −1.5. I overrode the offset to zero after checking the data, and recorded the override in the config.
+- Reoriented to the wrong river. The reach was first set along the Rio Farias. The user caught it, and I reoriented it on the Biguaçu centreline.
+- A measurement that waited. The alert-delay sampler used frame callbacks, which never ran in my test browser. I added a timer fallback, which added the 250 ms wait. The fix was to stamp latency at the moment the message arrived, and record frame timing only when frames actually ran.
+- A cache that hid the fix. A corrected viewer script was still being served from the browser cache. I versioned the script URL, and the next run used the new code.
+
+### Limits
+
+- Small footprint. The drone covers about 200 by 150 m, roughly 300 Sentinel-2 pixels. The channel is only a few pixels wide, so mixed pixels dominate.
+- Two drone epochs. The 3D view has two drone states and the slider has four. The drone pair spans the flood and four months of recovery, so it cannot separate flood change from seasonal change.
+- One site, one labeller, one pair. The truth is not general.
+- Flood scars, not inundation. Peak flood water was probably gone before the first clear scene after the flood (23 January), so the class is named "flood scar / channel change".
+- Simulated sensors. Their values and thresholds are not measurements.
+- Unconfirmed flood figures. The rainfall numbers are reported, not checked against the official bulletin.
+
+The viewer is not a validated monitoring tool. It shows how the layers fit together and what a zero-cost stack can and cannot show.
+
+### What I would do next
+
+Label more tiles across more sites and dates, so a scored result is possible. Replace the simulated sensors with a real feed. Find the source of the remaining terrain-edge strip. And measure alert delivery again with paint timing, before anyone quotes it.
+
+The code, data pipeline and write-up are in a public repository once it is set up. The viewer runs from a static page with no backend in replay mode.
+
+### Site metadata
+
+```yaml
+title: "A zero-cost river twin, and a change detector that scored zero"
+lang: en
+translationKey: sitetwin-river-twin
+categories: [geospatial-ai]
+tags: [digital-twin, change-detection, sentinel-2, drone, simulated-sensors, honest-evaluation]
+summary: "A 3D viewer for one river site on public data at zero cost: four satellite dates, drone point clouds, and simulated sensor alerts. The water-change detector scored 0 true positives against hand-drawn truth, so the result is reported as not scoreable."
+published: 2026-11-15
+updated: null
+comments: true
+map: false
+cover: cover.jpg
+```
