@@ -2867,7 +2867,7 @@ The code, data pipeline and write-up are in a public repository once it is set u
 title: "A zero-cost river twin, and a change detector that scored zero"
 lang: en
 translationKey: sitetwin-river-twin
-categories: [geospatial-ai]
+categories: [ai-projects]
 tags: [digital-twin, change-detection, sentinel-2, drone, simulated-sensors, honest-evaluation]
 summary: "A 3D viewer for one river site on public data at zero cost: four satellite dates, drone point clouds, and simulated sensor alerts. The water-change detector scored 0 true positives against hand-drawn truth, so the result is reported as not scoreable."
 published: 2026-11-15
