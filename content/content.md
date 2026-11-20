@@ -3086,7 +3086,11 @@ One area, one fire season, one pair of photos. This is a study, not a fire warni
 
 ### Maps for specialists
 
-Maps, tables and methods for specialists are available on request.
+Maps, tables and methods for specialists are in the repository linked below.
+
+### Code and data
+
+- [Code, method and data on GitHub](https://github.com/justinthe/scarline)
 
 ### Site metadata
 
