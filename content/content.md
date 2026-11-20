@@ -36,6 +36,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A12. From Docker Compose to Kubernetes: Packaging a Local RAG App for Production
 - A13. Is This CV-Screening Tool Safe and Correct Enough to Release?
 - A14. GeoAsk: Asking a PostGIS Database Questions in Plain Language
+- A17. Spotting bushfire scars from space
 
 ---
 
@@ -3027,4 +3028,79 @@ updated: null
 comments: true
 map: false
 cover: cover.jpg
+```
+
+
+---
+
+## A17. Spotting bushfire scars from space
+
+Our simple method didn't work here: just guessing that the whole area burned scored about as well, or better.
+
+![Satellite picture of the area in July 2022, before the fires, in colours that make burnt ground stand out.](images/scarline-burn-scars/map_pre.jpg "Figure 1: July 2022, before the fires. About 55 km across. North is up. Satellite data: Copernicus Sentinel-2.")
+
+![The same area in October 2022, after the fires.](images/scarline-burn-scars/map_post.jpg "Figure 2: October 2022, after the fires. The two photos are 105 days apart, about three and a half months. About 55 km across. North is up. Satellite data: Copernicus Sentinel-2.")
+
+![Grey satellite picture with orange where the ground changed and white outlines of the official burnt map. Most of the picture is orange.](images/scarline-burn-scars/home_change.png "Figure 3: Orange shows where the satellite saw the ground change. White outlines are the official map of what burned. About 55 km across. North is up. Satellite data: Copernicus Sentinel-2.")
+
+### The place
+
+This study looks at bushland near the tip of Cape York in northern Queensland, Australia. The area is about 55 km across.
+
+### What happened
+
+Much of the area burned between July and October 2022.
+
+### How a satellite sees a burn
+
+A satellite photographs the area every few days. Burnt ground reflects infrared light differently from living plants. Infrared is light our eyes cannot see. So comparing a before photo with an after photo shows what changed.
+
+What does this mean? dNBR is a number that measures how much each spot changed. Higher means more change.
+
+### What we found
+
+We marked the changed spots as burnt. Then we compared them with Queensland's official fire map. We also tried a simple guess: that the whole area burned.
+
+On the eastern half of the area, our method scored 75 out of 100. The guess scored 81.
+
+What does this mean? The score is an F1 score times 100. F1 is a way to rate how well two maps agree. It is a scale, not a percentage match.
+
+We also tested six smaller squares. Our method did a little better than the guess on four of them, but not by enough to count.
+
+### Why it failed here
+
+- Most of the land burned, so guessing that everything burned works well.
+- The photos are about three and a half months apart. Normal dry-season browning can look like fire.
+- The official map came from the same satellite, so it is not an independent check.
+- The test squares touch each other.
+
+### What it means for you
+
+Before you trust a burn map's score, check it against the "everything burned" guess.
+
+### Sources and licences
+
+Contains modified Copernicus Sentinel data 2022.
+
+Queensland fire scars: CC BY 4.0, State of Queensland (Department of Environment and Science) 2022.
+
+One area, one fire season, one pair of photos. This is a study, not a fire warning service.
+
+### Maps for specialists
+
+Maps, tables and methods for specialists are available on request.
+
+### Site metadata
+
+```yaml
+title: "Spotting bushfire scars from space"
+lang: en
+translationKey: scarline-burn-scars
+categories: [geospatial-ai]
+tags: [burn-scar, sentinel-2, change-detection, honest-evaluation]
+summary: "A simple satellite method did not beat guessing that the whole area burned."
+published: 2026-11-20
+updated: null
+comments: true
+map: false
 ```
