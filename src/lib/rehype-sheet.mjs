@@ -31,7 +31,7 @@ export default function rehypeSheet() {
       node.children = node.children.map((c) => {
         const kids = c.children?.filter((k) => !(k.type === 'text' && !k.value.trim())) ?? [];
         if (c.tagName === 'p' && kids.length && kids.every((k) => k.tagName === 'img')) {
-          return kids.map((img) => {
+          const figs = kids.map((img) => {
             const caption = img.properties.title;
             delete img.properties.title;
             img.properties.loading = 'lazy';
@@ -40,6 +40,8 @@ export default function rehypeSheet() {
               el('span', {}, [{ type: 'text', value: caption }]),
             ])] : [])]);
           });
+          // Images written on adjacent lines (one paragraph) read as one row of figures.
+          return figs.length > 1 ? el('div', { className: ['figure-row'] }, figs) : figs;
         }
         if (c.tagName === 'table') return el('div', { className: ['table-scroll'], tabIndex: 0, role: 'region', ariaLabel: 'Table' }, [c]);
         if (c.tagName === 'svg' && String(c.properties.id ?? '').startsWith('mermaid')) {
