@@ -3038,9 +3038,7 @@ cover: cover.jpg
 Our simple method didn't work here: just guessing that the whole area burned scored about as well, or better.
 
 ![Satellite picture of the area in July 2022, before the fires, in colours that make burnt ground stand out.](images/scarline-burn-scars/map_pre.jpg "Figure 1: July 2022, before the fires. About 55 km across. North is up. Satellite data: Copernicus Sentinel-2.")
-
 ![The same area in October 2022, after the fires.](images/scarline-burn-scars/map_post.jpg "Figure 2: October 2022, after the fires. The two photos are 105 days apart, about three and a half months. About 55 km across. North is up. Satellite data: Copernicus Sentinel-2.")
-
 ![Grey satellite picture with orange where the ground changed and white outlines of the official burnt map. Most of the picture is orange.](images/scarline-burn-scars/home_change.png "Figure 3: Orange shows where the satellite saw the ground change. White outlines are the official map of what burned. About 55 km across. North is up. Satellite data: Copernicus Sentinel-2.")
 
 ### The place
