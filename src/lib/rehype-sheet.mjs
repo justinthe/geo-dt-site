@@ -34,7 +34,8 @@ export default function rehypeSheet() {
           const figs = kids.map((img) => {
             const caption = img.properties.title;
             delete img.properties.title;
-            img.properties.loading = 'lazy';
+            img.properties.loading = kids.length > 1 ? 'eager' : 'lazy';
+            if (kids.length > 1) img.properties.sizes = '(min-width: 52rem) 33vw, 100vw';
             return el('figure', {}, [img, ...(caption ? [el('figcaption', {}, [
               el('span', { className: ['figure-num'] }, [{ type: 'text', value: `${label} ${++fig}` }]),
               el('span', {}, [{ type: 'text', value: caption }]),

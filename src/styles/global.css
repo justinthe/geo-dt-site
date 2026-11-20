@@ -294,9 +294,10 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 3rem 0; }
 .prose figcaption { margin-top: 0.6rem; font: 400 0.875rem/1.45 var(--font-sans); color: var(--muted); display: flex; gap: 0.75rem; }
 .prose figcaption .figure-num { color: var(--index-ink); flex: none; font-size: 0.8rem; padding-top: 0.08rem; }
 .figure-row { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin: 2.2rem 0; }
-.figure-row figure { margin: 0; }
-.figure-row figcaption { flex-direction: column; gap: 0.15rem; }
-@media (min-width: 44rem) {
+.figure-row figure { margin: 0; min-width: 0; }
+.figure-row figure > * { min-width: 0; }
+.figure-row figcaption { flex-direction: column; gap: 0.15rem; font-size: 1rem; overflow-wrap: anywhere; }
+@media (min-width: 52rem) {
   .figure-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 }
 @media (min-width: 68rem) {
