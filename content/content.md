@@ -11,12 +11,13 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 
 **Case studies**
 1. Drone and AI Monitoring of a National Capital Construction Site
-2. Multi-Source Monitoring of a 142 km High-Speed Railway Construction
+2. Multi-Source Monitoring of a 145.5 km High-Speed Railway Construction
 3. Nationwide Rice Productivity Assessment in One Month
 4. Hydropower Feasibility Studies Across Four Remote Sites
 5. Landslide Early Warning System for Minihydro Power Plants
 6. Mapping Illegal Mining to Protect Communities and Nature
 7. Forecasting Belitung's Coastline
+8. Sugarcane Land Suitability Across Central and East Java
 
 **Articles** (series: Digitalising a Construction Company)
 - A1. Building the App Was Easy. Getting People to Use It Took Three Months. (Part 1)
@@ -52,7 +53,6 @@ We flew repeated drone surveys over the site of Indonesia's new national capital
 | **Location** | East Kalimantan, Indonesia |
 | **Client** | A national government authority |
 | **Scope** | Phase 1 of a drone-based mapping and monitoring programme |
-| **Year** | [TO CONFIRM] |
 | **My role** | Designed and led the programme: drone deployment, data processing, AI analysis, and reporting |
 | **Data** | High-resolution aerial imagery and LiDAR from repeated drone surveys |
 | **Methods** | Photogrammetry, AI object detection of buildings and structures, overlay with permitted-area maps, change detection between survey dates |
@@ -194,9 +194,9 @@ regions:
 
 ---
 
-## 2. Multi-Source Monitoring of a 142 km High-Speed Railway Construction
+## 2. Multi-Source Monitoring of a 145.5 km High-Speed Railway Construction
 
-We monitored construction along the 142 km Jakarta–Bandung high-speed railway corridor, using drone surveys and computer vision to detect and count construction objects against the schedule. Where drones couldn't fly, satellite imagery covered the gap. A third, lower-priority task was analysing social media and on-site data to help plan responses to community concerns.
+We monitored construction along the Jakarta–Bandung high-speed railway, which covered 145.5 km of construction site, using drone surveys and computer vision to detect and count construction objects against the schedule. Where drones couldn't fly, satellite imagery covered the gap. A third, lower-priority task was analysing social media and on-site data to help plan responses to community concerns.
 
 ### At a glance
 
@@ -205,8 +205,7 @@ We monitored construction along the 142 km Jakarta–Bandung high-speed railway 
 | **Sector** | Infrastructure & Construction |
 | **Location** | Jakarta to Bandung corridor, through Bekasi, Karawang, and Purwakarta, Indonesia |
 | **Client** | A railway construction consortium |
-| **Scope** | Construction progress monitoring along about 142 km, plus social media analysis |
-| **Year** | [TO CONFIRM] |
+| **Scope** | Construction progress monitoring along 145.5 km of construction site, plus social media analysis |
 | **My role** | Led the monitoring programme, coordinating drone, engineering, and AI teams |
 | **Team** | 10 people: 3 UAV operators, 4 engineers, 2 AI engineers, 1 administrator |
 | **Data** | Drone imagery and video, satellite imagery, on-site observations, social media data |
@@ -261,9 +260,9 @@ For selected sections, we combined the spatial data from each monitoring period 
 
 We analysed social media data to understand public sentiment and concerns about the project. Combined with what we gathered on site, it helped the consortium decide how to respond. [TO CONFIRM: platforms and analysis methods used]
 
-![Word cloud of Indonesian news terms from October 2020](images/high-speed-railway-monitoring/word_buble_202010.png "Most frequent terms in news and social posts, October 2020.")
+![Word cloud of Indonesian news terms, first period](images/high-speed-railway-monitoring/word_buble_202010.png "Most frequent terms in news and social posts, first period.")
 
-![Word cloud of Indonesian news terms from October 2021](images/high-speed-railway-monitoring/word_buble_202110.png "The same analysis a year later, October 2021.")
+![Word cloud of Indonesian news terms, a year later](images/high-speed-railway-monitoring/word_buble_202110.png "The same analysis a year later.")
 
 Results went to the consortium as reports, interactive dashboards, and the 3D models.
 
@@ -278,6 +277,17 @@ Results went to the consortium as reports, interactive dashboards, and the 3D mo
 | Gap-fill satellite maps | Areas drones couldn't cover in a given period | Project managers |
 | Social response strategy | Public sentiment from social media, combined with on-site findings, with recommended responses | Community relations and management |
 | Interactive dashboards | Progress, counts, 3D models, and social insights in one place | All stakeholders |
+
+### Measured outcomes
+
+| Measure | Result |
+| --- | --- |
+| Construction site covered | 145.5 km |
+| Workpoints | 237 |
+| Objects analysed and geolocated | More than 22,000 |
+| Field work | More than 14 days |
+| Field operators | 2 |
+| Site interruptions | 0 |
 
 ### Benefits
 
@@ -310,10 +320,10 @@ Results went to the consortium as reports, interactive dashboards, and the 3D mo
 ### Site metadata
 
 ```yaml
-title: "Multi-Source Monitoring of a 142 km High-Speed Railway Construction"
+title: "Multi-Source Monitoring of a 145.5 km High-Speed Railway Construction"
 lang: en
 translationKey: high-speed-railway-monitoring
-proof: { value: "142 km", label: "Railway corridor monitored", quote: "142 km Jakarta–Bandung high-speed railway corridor" }
+proof: { value: "145.5", label: "km of construction site covered", quote: "145.5 km of construction site" }
 sector: infrastructure-construction
 secondarySectors: []
 client: "A railway construction consortium"
@@ -322,8 +332,8 @@ year: null            # TO CONFIRM
 role: "Programme lead"
 team: 10
 methods: [drone-photogrammetry, object-detection, satellite-imagery, time-series-3d, social-media-analysis]
-outcome: "Construction progress counted against schedule along 142 km, with no gaps when drones were grounded"
-summary: "Drones and computer vision counted construction progress along a 142 km railway, with satellite imagery filling gaps and social media analysis guiding public response."
+outcome: "Construction progress counted against schedule along 145.5 km, with no gaps when drones were grounded"
+summary: "Drones and computer vision counted construction progress along a 145.5 km railway, with satellite imagery filling gaps and social media analysis guiding public response."
 featured: true
 comments: true
 map: false
@@ -343,11 +353,10 @@ We predicted rice paddy productivity within a one-month deadline by combining sa
 | | |
 | --- | --- |
 | **Sector** | Agriculture & Food Security |
-| **Location** | [CONFIRM: rice-producing areas of Java, or nationwide with ground truth in Java] |
+| **Location** | Nationwide, built from a 9-district drone pilot in 3 Java provinces |
 | **Client** | A national government ministry |
 | **Scope** | Rice paddy productivity prediction |
 | **Timeline** | One month |
-| **Year** | 2018 (May) |
 | **My role** | Project director and data scientist |
 | **Team** | 5 UAV teams (3 to 5 people each), 3 GIS engineers, 2 agricultural engineers, 2 data scientists |
 | **Data** | Satellite imagery for area coverage; drone (UAV) imagery of sample fields |
@@ -384,7 +393,7 @@ To measure the satellite's error, five UAV teams flew drones over sample fields 
 
 ![Drone photo of rice paddies beside the same paddies rendered as a vegetation index from red to green](images/national-rice-productivity/ortho_vs_hyperspectral.png "Drone RGB (left) and the vegetation index from the same flight (right).")
 
-We then applied the mean error to the satellite imagery, which gave corrected values across the whole area. Productivity was predicted from those corrected NDVI values. [CONFIRM: how NDVI was converted to productivity, for example a regression against yield data]
+We then applied the mean error to the satellite imagery, which gave corrected values across the whole area. Productivity was predicted from those corrected values with a regression on spectral indices, shown below.
 
 ![Yield regression formula over a rice field: Yield equals beta zero plus terms for NDRE, WBI and PRI](images/national-rice-productivity/formulae.png "Yield modelled as a regression on spectral indices.")
 
@@ -393,10 +402,43 @@ We then applied the mean error to the satellite imagery, which gave corrected va
 | Output | What it shows | Who uses it |
 | --- | --- | --- |
 | Productivity maps | Predicted rice productivity across the study area | Policymakers and agricultural planners |
-| Yield estimates | Estimated rice yields by area [TO CONFIRM: district, province, or other level] | Food security planners |
+| Yield estimates | Estimated rice yields by district for the pilot area, and by province for the nationwide extension | Food security planners |
 | Regional comparisons | Where productivity is high and low | Policymakers |
 | Corrected NDVI dataset | Satellite NDVI corrected with drone measurements | Analysts, for validation and future assessments |
 | Report | Findings and recommendations | Ministry decision-makers |
+
+### Measured outcomes
+
+The drone pilot was the ground basis for the assessment. It covered nine districts in three Java provinces, and its relationships were then extended to a nationwide productivity estimate from satellite data.
+
+| Measure | Result |
+| --- | --- |
+| Area surveyed by drone | 25,000 ha |
+| Districts and provinces | 9 districts, 3 Java provinces |
+| UAV teams | 5 |
+| Rice canopy detected | 10,646 ha |
+| Estimated production in the surveyed districts | About 59,050 t |
+| Agreement with Ministry of Agriculture figures | 8 of 9 districts within 0.6 t/ha (mean absolute gap 0.40 t/ha) |
+
+
+For the nationwide extension, satellite-based estimates were compared with BPS (Statistics Indonesia) 2016 productivity for 12 provinces.
+
+| Province | Satellite-based estimate (t/ha) | BPS 2016 (t/ha) |
+| --- | --- | --- |
+| Aceh | 5.16 | 5.13 |
+| Sumatera Utara | 4.23 | 5.20 |
+| Sumatera Selatan | 4.06 | 5.00 |
+| Sumatera Barat | 4.01 | 5.90 |
+| Lampung | 4.88 | 5.04 |
+| Banten | 4.84 | 5.66 |
+| Bali | 5.59 | 6.06 |
+| DIY | 3.59 | 5.58 |
+| Sulawesi Selatan | 5.96 | 5.72 |
+| Kalimantan Selatan | 5.00 | 4.22 |
+| Kalimantan Barat | 2.75 | 2.74 |
+| NTB | 5.06 | 4.64 |
+
+Satellite-based estimate vs BPS 2016, t/ha. Caveat: drone-only precision was not established. The estimates depend on satellite NDVI curves.
 
 ### Benefits
 
@@ -421,10 +463,10 @@ Next time we would do three things.
 
 ### To confirm before publishing
 
-- [ ] Scope: the lesson-learned record says "several areas of Java," while the portfolio describes a nationwide assessment. Which is correct?
-- [ ] How NDVI was converted to productivity
+- [x] Scope: nationwide, built from a 9-district drone pilot in 3 Java provinces
+- [x] How NDVI was converted to productivity (regression on spectral indices)
 - [ ] Satellite source (for example Sentinel-2, Landsat, or commercial imagery)
-- [ ] Output level: field, district, province?
+- [x] Output level: district (pilot) and province (nationwide extension)
 - [ ] Whether the project can be described publicly without the ministry's name
 - [ ] Any images you're allowed to publish
 
@@ -438,8 +480,8 @@ proof: { value: "1 month", label: "National rice survey", quote: "within a one-m
 sector: agriculture-food-security
 secondarySectors: []
 client: "A national government ministry"
-location: "Indonesia"   # CONFIRM: Java or nationwide
-year: 2018
+location: "Indonesia"
+year: null
 role: "Project director and data scientist"
 team: "22-32"         # 5 UAV teams of 3-5, plus 7 engineers and data scientists
 methods: [ndvi, satellite-imagery, drone-calibration, mean-error-correction, yield-prediction]
@@ -470,7 +512,6 @@ Under a 12-month blanket contract, we carried out feasibility studies for hydrop
 | **Scope** | Feasibility studies for four hydropower sites under one blanket contract |
 | **Timeline** | 12 months |
 | **Outcome** | All four sites proceeded to construction |
-| **Year** | [TO CONFIRM] |
 | **My role** | Managed the contract and all four studies, overseeing the LiDAR, drone, sensor, statistics, and machine learning workstreams |
 | **Data** | Drone LiDAR, drone imagery and video, IoT water-flow and weather sensors, BPS (Statistics Indonesia) data |
 | **Methods** | LiDAR processing into terrain models, drone mapping, sensor data analysis, machine learning to forecast flood and erosion areas |
@@ -593,7 +634,6 @@ We built a landslide early warning system for an operator of multiple minihydro 
 | **Location** | [TO CONFIRM: regions or number of plants covered] |
 | **Client** | An operator of multiple minihydro power plants |
 | **Scope** | Design, build, deployment, training, and ongoing maintenance of a landslide early warning system |
-| **Year** | [TO CONFIRM] |
 | **My role** | [TO CONFIRM] |
 | **Team** | Our team: 2 spatial data scientists, 1 programmer, 1 GIS engineer. Client side: about 20 engineers and field operators contributing knowledge and feedback |
 | **Data** | Periodic drone baselines; InSAR ground movement, hyperspectral imagery, orthophotos, weather forecasts, wind data, and geological fault lines; rain gauges; SCADA water level and flow |
@@ -748,7 +788,6 @@ Illegal mining strips forests, erodes hillsides, and contaminates the rivers tha
 | **Client** | A national environmental agency |
 | **Purpose** | Protecting communities and ecosystems from the effects of illegal mining |
 | **Scope** | Mapping mining activity, identifying illegal mines, and assessing the danger to land, water, and people in three regions |
-| **Year** | [TO CONFIRM] |
 | **My role** | [TO CONFIRM] |
 | **Data** | Drone imagery (high-resolution RGB and multispectral), mining permit areas, soil and water samples |
 | **Methods** | Drone photogrammetry, land classification, comparison with permit areas, environmental sampling, risk mapping |
@@ -901,7 +940,6 @@ Between 1990 and 2024, Belitung Island lost about 3,800 hectares of land. We mea
 | **Location** | Belitung Island, Bangka Belitung, Indonesia |
 | **Client** | [TO CONFIRM: client type, or self-initiated study] |
 | **Scope** | Historical coastline change 1990–2024 and a coastline forecast to 2045 |
-| **Year** | [TO CONFIRM] |
 | **My role** | [TO CONFIRM] |
 | **Data** | Landsat 5/7/8/9, Sentinel-2, Sentinel-1 SAR, Copernicus DEM, Global Mangrove Watch, IPCC AR6 sea-level projections |
 | **Methods** | Google Earth Engine shoreline extraction (MNDWI), tidal correction, trend analysis across six epochs, Bruun Rule sea-level retreat, driver analysis |
@@ -1056,6 +1094,118 @@ regions:
 
 ---
 
+## 8. Sugarcane Land Suitability Across Central and East Java
+
+We assessed 30,000 ha of land in Central and East Java for sugarcane for a state plantation company. Satellite data and field visits fed a suitability scoring of the land, and soil sampling at 284 points checked the ground conditions. Each of 33 forest management units (KPH) was then ranked by how much suitable land it holds.
+
+### At a glance
+
+| | |
+| --- | --- |
+| **Sector** | Agriculture & Food Security |
+| **Location** | Central Java and East Java, Indonesia |
+| **Client** | A state plantation company |
+| **Scope** | Land suitability survey for sugarcane across 30,000 ha and 33 KPH |
+| **My role** | Project director and systems architect; our company delivered scope, field work, spatial analysis, and reporting; soil lab tests by a partner lab |
+| **Data** | Satellite imagery, drone imagery, IoT data, soil tests, an existing land suitability baseline map |
+| **Methods** | Desktop study, drone and AI analysis, purposive soil-point sampling, spatial interpolation of 14 soil and land parameters, machine learning suitability scoring, GIS overlay on the baseline map |
+| **Deliverables** | Suitability maps, KPH ranking by suitable area, per-parameter improvement recommendations, report |
+
+### The challenge
+
+The client wanted to know where sugarcane could expand. Two things made that hard.
+
+1. The area was very large and the timeline was tight, so every hectare could not be visited.
+2. The client needed a current, measured picture for each forest management unit, not just a regional estimate.
+
+### How we did it
+
+```mermaid
+flowchart LR
+  A["Desktop study<br/>Satellite and other data"] --> B["Field survey<br/>Soil points, drone imagery"]
+  B --> C["Interpolation<br/>14 parameters over the area"]
+  C --> D["Suitability scoring<br/>Classes S1, S2, S3, N"]
+  D --> E["Compare with baseline<br/>Change by class"]
+  D --> F["Rank KPH<br/>By suitable area"]
+```
+
+We started with a desktop study using satellite data and other sources to find candidate areas. Field teams then visited the ground, took soil samples, and used drones for imagery. Soil points were chosen on purpose to represent the range of conditions: we sampled 284 of the 304 planned points.
+
+We interpolated 14 soil and land parameters from those points across the whole area. Machine learning combined them into a suitability score, and we classed each area as highly suitable (S1), moderately suitable (S2), marginally suitable (S3), or not suitable (N). AI tools sped up processing so the work fit the timeline. We then overlaid the result on the existing baseline map in GIS to see what had changed.
+
+### What we delivered
+
+| Output | What it shows | Who uses it |
+| --- | --- | --- |
+| Suitability maps | Class (S1, S2, S3, N) for each area | Planners and agronomists |
+| KPH ranking | Each KPH ranked by its suitable area | Management |
+| Improvement recommendations | What would raise suitability, parameter by parameter | Agronomists |
+| Report and interactive maps | Method, results, and caveats | Decision-makers |
+
+### Measured outcomes
+
+| Measure | Result |
+| --- | --- |
+| Area assessed | 30,000 ha |
+| Forest management units (KPH) | 33 |
+| Soil points sampled | 284 of 304 planned |
+
+Class area compared with the baseline map (ha):
+
+| Class | Baseline | This survey |
+| --- | --- | --- |
+| S1 | 55 | 0 |
+| S2 | 5,167 | 1,770 |
+| S3 | 19,253 | 19,193 |
+| N | 5,532 | 9,045 (+63%) |
+
+Caveat: the survey was done in the dry season, and part of the change from the baseline may come from land-use change, so the survey does not isolate the cause.
+
+### Benefits
+
+- One method covered 30,000 ha, so units could be compared on the same basis.
+- Ranking KPH by suitable area let the client start where the most suitable land is.
+- Per-parameter recommendations showed what limits each area, such as soil properties that could be improved.
+- Measured soil points at 284 locations backed the scoring, so it did not rest on satellite data alone.
+
+### Lessons learned
+
+The dry-season timing matters. Drainage, soil moisture and nutrient readings can differ in the wet season, so the class areas are a snapshot. Because part of the difference from the baseline may come from land-use change, the numbers show where suitable land is today and do not explain why it changed.
+
+With a large area and a tight deadline, purposive sampling meant a modest number of soil points had to represent very different conditions. Twenty of the 304 planned points were not sampled, and interpolation had to cover those gaps.
+
+### To confirm before publishing
+
+- [ ] Whether the client can be described publicly, even without its name
+- [ ] Any images you're allowed to publish
+
+### Site metadata
+
+```yaml
+title: "Sugarcane Land Suitability Across Central and East Java"
+lang: en
+translationKey: sugarcane-suitability-java
+proof: { value: "30,000 ha", label: "Assessed for sugarcane suitability", quote: "We assessed 30,000 ha of land" }
+sector: agriculture-food-security
+secondarySectors: []
+client: "A state plantation company"
+location: "Central Java and East Java, Indonesia"
+year: null
+role: "Project director and systems architect"
+methods: [satellite-imagery, drone-mapping, soil-sampling, spatial-interpolation, suitability-scoring]
+outcome: "30,000 ha classed for sugarcane suitability and 33 forest management units ranked by suitable area"
+summary: "Satellite data, field soil sampling, and machine learning scored 30,000 ha in Central and East Java for sugarcane suitability and ranked 33 forest management units."
+featured: true
+comments: true
+map: false
+draft: true
+regions:
+  - { name: "Central Java", lon: 110.2, lat: -7.2 }
+  - { name: "East Java", lon: 112.2, lat: -7.8 }
+```
+
+---
+
 # Articles
 
 Practitioner articles live here alongside the case studies for now. On the site they go in `src/content/posts/`, not `projects/`.
@@ -1104,7 +1254,7 @@ Staff using it is not enough. If management can't see what the app gives them, s
 
 ### Six months from launch to habit
 
-People didn't adopt it at launch. It took months of steady effort.
+People didn't adopt it at launch. It took months of steady effort. The app had 250 users, and by month 4 acceptance was 100%.
 
 ```mermaid
 timeline
@@ -1113,12 +1263,13 @@ timeline
   Launch : A simple timesheet app
   Months 1-3 : Hard adoption work
   Month 3 : Part of daily work
+  Month 4 : 100% acceptance across 250 users
   Month 6 : Chief engineers can't work without it
 ```
 
 The first three months were painful. [ADD: what that looked like, for example missed entries, pushback, or fixes to the app]
 
-Around the third month, things changed. The app stopped being a new tool people were told to use and became part of how the company ran.
+Around the third month, things changed. The app stopped being a new tool people were told to use and became part of how the company ran. By month 4, all 250 users had accepted it.
 
 By the sixth month, the chief engineers couldn't work without it. One of them complained because someone else wasn't using the app properly. The people whose judgement the data was meant to support were now enforcing it.
 
@@ -1408,7 +1559,7 @@ Most spatial AI work falls into five kinds of task. Each has an example from my 
 
 | Task | What it means | Example from my work |
 | --- | --- | --- |
-| Detect and count | Find specific objects in imagery and count them | Detecting every building on a new capital city site; counting pile caps, bored piles, and girders along a 142 km railway corridor |
+| Detect and count | Find specific objects in imagery and count them | Detecting every building on a new capital city site; counting pile caps, bored piles, and girders along a 145.5 km railway corridor |
 | Classify | Label each area by what it is | Deep learning land cover classification feeding a landslide warning system; separating forest, farmland, and mining sites |
 | Track change | Compare data over time to see what's new or gone | Building a dated history of what was built, when, and where on a construction site |
 | Predict | Estimate something that can't be seen directly, or that hasn't happened yet | A Random Forest model forecasting landslide-prone areas daily; machine learning forecasting flood and erosion areas at hydropower sites; rice productivity estimated from drone and satellite data |
@@ -1775,7 +1926,7 @@ draft: true
 
 *An internal question-answering tool I built at work, and how I measured whether its answers can be trusted.*
 
-GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 405 recent remote sensing papers (399 downloaded by the system, 6 added by hand). Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models. I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of questions (R@5 0.972).
+GeoScholar is an internal tool I built for work. Colleagues ask a question in plain English and get an answer drawn from 405 recent remote sensing papers (399 downloaded by the system, 6 added by hand). Each claim names the paper section behind it, and when the papers don't contain the answer, the tool says so. It runs on one desktop with free, open language models. I built it over 6 weeks, at about 10 hours a week. The technique is called retrieval-augmented generation (RAG): the system first searches a document collection, then has a language model write an answer from what it found. I measured every design choice on a 99-question test set instead of assuming it. The best setup combines two kinds of search and then re-sorts the results. It puts the right paper in the top 5 search results for 97.2% of the 91 answerable questions (R@5 0.972, measured on those 91, not on all 99).
 
 <figure><video src="/geo-dt-site/geoscholar/demo.mp4" poster="/geo-dt-site/geoscholar/cover.png" autoplay muted loop playsinline aria-label="GeoScholar answering a question with cited sources"></video><figcaption>Asking GeoScholar a question. The answer cites its sources as [S1], [S2] and so on, and the app shows each one as a paper ID and section. A question the papers can't answer gets a fixed refusal.</figcaption></figure>
 
@@ -1786,11 +1937,12 @@ GeoScholar is an internal tool I built for work. Colleagues ask a question in pl
 | **Papers** | 405 papers from arXiv (a free public archive where researchers post papers), in the computer vision and image-processing categories: 399 downloaded by the system and 6 added by hand. The evaluation below used the first 399, cut into 19,650 text pieces |
 | **Tools** | Qdrant (a search database), GROBID (a program that reads PDFs and finds their sections), bge-small-en-v1.5 (a model that turns text into numbers that capture its meaning), bge-reranker-base (a model that re-sorts search results), Llama 3.1 8B (the open language model that writes the answers), Ollama (a free program that runs language models on your own computer), FastAPI and Streamlit (the web service and the app screen), Docker Compose (starts everything with one command) |
 | **Hardware** | One desktop graphics card (RTX 3060, 12 GB of memory) |
+| **Usage** | 5 engineers, about 2 queries per person per day over a month, in bursts |
 | **Test set** | 99 questions: 91 the papers can answer and 8 they can't |
 
 ### Results in brief
 
-- **Finding the right paper:** the right paper was in the top 5 results 97.2% of the time (R@5 0.972). On average it landed very near the top (MRR 0.954, where 1.0 means always first).
+- **Finding the right paper:** the right paper was in the top 5 results for 97.2% of the 91 answerable questions (R@5 0.972; the 8 unanswerable questions have no right paper, so they are not in this figure). On average it landed very near the top (MRR 0.954, where 1.0 means always first).
 - **Knowing when not to answer:** it refused all 8 questions the papers can't answer, and wrongly refused 1 of the 91 it could.
 - **Staying faithful to the sources:** 88.5% of the claims in its answers were judged supported by the cited text (faithfulness 0.885) when one AI judge scored them, and 85.5% with a second judge. 80.2% of claims carry a citation.
 - **Speed:** a typical answer takes 4.5 seconds. About 0.4 seconds is search and re-sorting, and the rest is the model writing.
