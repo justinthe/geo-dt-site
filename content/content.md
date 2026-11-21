@@ -37,6 +37,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A13. Is This CV-Screening Tool Safe and Correct Enough to Release?
 - A14. GeoAsk: Asking a PostGIS Database Questions in Plain Language
 - A17. Spotting bushfire scars from space
+- A18. We Tried to Catch Card Fraud With a Computer. Here Is What Actually Worked.
 
 ---
 
@@ -3102,6 +3103,125 @@ categories: [geospatial-ai]
 tags: [burn-scar, sentinel-2, change-detection, honest-evaluation]
 summary: "A simple satellite method did not beat guessing that the whole area burned."
 published: 2026-11-20
+updated: null
+comments: true
+map: false
+```
+
+## A18. We Tried to Catch Card Fraud With a Computer. Here Is What Actually Worked.
+
+*A learning project on a public dataset of card payments. Most of the code was written with an AI coding assistant, and I checked the results myself. What helped, what did not, and how easy it is to fool yourself.*
+
+Every time you pay by card online, a system decides in a fraction of a second whether the payment looks normal. Banks and payment companies use computer models to make that call. I wanted to know how well a model could do it, so I used a public dataset from a 2019 competition on Kaggle, a website where people share data and compete on prediction problems.
+
+The competition is over. I used it to learn, not to win.
+
+![Bar chart comparing three ways of testing the same model. The honest time-based test scores 0.926, a random shuffle scores 0.972, and holding out whole cards scores 0.883.](images/fraud-detection-kaggle/split_scores.png "Figure 1: The same model scores very differently depending on how the test is set up. Validation AUC, higher is better. The axis starts at 0.5, so differences look bigger than they are.")
+
+### Terms used on this page
+
+- **Fraud detection:** finding payments that are probably not made by the card owner.
+- **AI model:** a program that learns patterns from past examples, then makes a prediction for new ones. Here it predicts "fraud" or "not fraud" for each payment.
+- **Training data:** past payments the model learns from. Each payment has the answer attached: fraud or not.
+- **Test data:** payments the model has not seen, used to check its predictions. In this competition the answers for the test payments were hidden.
+- **Feature (or column):** one piece of information about a payment, such as the amount or the time. The data had about 400 of them. Many have anonymous names like V201, and their meaning is not public.
+- **AUC (area under the curve):** a score for how well a model ranks fraud above normal payments. 0.5 means it is no better than guessing. 1.0 means it always ranks correctly. Higher is better.
+- **Validation:** holding back part of the training data to check the model while we build it.
+- **Overfitting:** when a model memorises the examples it has seen and fails on new ones.
+- **Leakage:** when the model accidentally sees the answer, or information from the future, during training. It makes the score look better than it really is.
+- **Hyperparameters (or settings):** choices made before training, such as how deep each decision tree may grow.
+
+### The data
+
+The training set had about 590,000 card payments from roughly six months. About 3.5% of them were fraud. The test set had about 507,000 later payments. Fraud is rare, so a model that always says "not fraud" would be right 96.5% of the time and still useless. That is why we use AUC, not plain accuracy.
+
+### Step 1: a first model
+
+We used a common method called XGBoost. It builds many small decision trees, one after another, and each new tree corrects the mistakes of the ones before. It is a strong default for this kind of data.
+
+The first model scored 0.920. But that number was wrong. Two of the columns, the transaction ID and the transaction time, carried hidden information about the order of payments. Once we removed them, the score dropped to 0.918. That is the honest starting point.
+
+The lesson: a score that looks better than it should is a warning, not good news.
+
+### Step 2: adding new features
+
+We built 14 new features from the existing columns. The main ideas were:
+
+- **Time of day and day of week.** Fraud may happen at unusual hours.
+- **Amount on a log scale and the cents part.** Large amounts are rare, so a log scale makes them easier for the model to use.
+- **Counts.** How many times the same card, address, or email domain appears across all payments.
+- **Per-card averages.** The average amount a card usually spends, and how far the current payment is from that average.
+- **Email match.** Whether the buyer's and recipient's email domains are the same.
+
+With these features the score rose to 0.926, a gain of about 0.008.
+
+### Step 3: which features did the work?
+
+We tested each group on its own, and also with each group removed. The counts did most of the work. On their own they added about 0.006 to the score. The per-card average features came second.
+
+Counts likely help because a card that appears in many payments, or with many addresses, behaves differently from a card that is used only now and then. The competition does not fully explain what each count column measures, so this is our best reading, not a confirmed fact.
+
+The time-of-day features added almost nothing once the other features were there.
+
+### Step 4: checking the result
+
+A single test can be lucky. We ran the model with three different random seeds, which changes how the trees are built, and the gain held. We also split the training data into four blocks in time order. Each block trained on the earlier data and was tested on the next. The core features beat the starting model in all four blocks, by about 0.004 each time.
+
+Some extra count features that we added later looked slightly better on one test, but the gain was small and changed from block to block. We treat them as "maybe" for now.
+
+### Step 5: tuning the settings
+
+We tried eight different sets of settings, such as how deep the trees may grow and how many payments each leaf needs. The best set gained about 0.001 over the default. Tuning helped a little, but the features mattered far more.
+
+### The biggest trap: how you split the data
+
+This was the most important lesson, and it is shown in Figure 1.
+
+- **Random shuffle:** mix all the payments, then split them. The score was 0.972. It looks amazing, but it is not real. Payments from the same card and the same week end up on both sides of the split, so the model learns patterns that will not appear in future payments.
+- **Hold out whole cards:** keep every payment from a card on one side of the split. The score was 0.883. This is harsher than real life, because most payments in the real test come from cards the model has already seen.
+- **Split by time:** train on the earlier payments, test on the later ones. The score was 0.926. This is the closest copy of the real job: predicting next month's fraud from last month's data.
+
+We use the time split as our main yardstick. The random-shuffle score would have told us we were nearly perfect. We were not.
+
+### So where does this leave us?
+
+Our best model scores about 0.926 on the time-based test. Some caveats matter:
+
+- We do not have the hidden answers for the test payments, so we cannot know the real score yet.
+- We chose our features and settings while looking at these same tests, so our numbers are a little too kind.
+- The differences between our final options are smaller than the random noise in the results.
+
+### What we could do further
+
+These are the next steps I would take, in rough order:
+
+1. **Look for missing information.** Many columns are blank for a large share of payments, and blanks often come in groups. A flag for "this group is blank" might carry signal. We have not tested this yet.
+2. **Count recent activity.** How many payments a card made in the last hour or day, and how long since its last payment. Fraud often comes in bursts. Our current counts add up all history and ignore timing.
+3. **Use past fraud rates carefully.** Replacing a category, such as a merchant, with the fraud rate seen for it in earlier data can be powerful. It is easy to leak the answer by accident, so it must be calculated only on data the model has not learned from.
+4. **Remove noisy columns.** Some of the 339 anonymous columns may add noise. Dropping them could make the model simpler and steadier.
+5. **Explain individual decisions.** Tools exist that show which features pushed one payment toward "fraud". That would help a person check the model's reasons.
+6. **Get a clean test.** The only fully fair check is a fresh set of payments with real answers. That is the most useful thing a real project can do before trusting any score.
+
+### What it means for you
+
+If you hear that an AI spots fraud with a score of 97%, ask how it was tested. A random split can make a model look far better than it is. Ask whether the test used later data than the training, and whether the score was compared with a simple guess.
+
+### Sources and licences
+
+IEEE-CIS Fraud Detection, a competition on Kaggle (2019), hosted by the IEEE Computational Intelligence Society: https://www.kaggle.com/competitions/ieee-fraud-detection. Check the competition's data terms before reusing the data.
+
+Scores are our own validation results, run in 2026. They are not official competition scores.
+
+### Site metadata
+
+```yaml
+title: "We Tried to Catch Card Fraud With a Computer. Here Is What Actually Worked."
+lang: en
+translationKey: fraud-detection-kaggle
+categories: [ai-projects]
+tags: [fraud-detection, machine-learning, xgboost, honest-evaluation, kaggle]
+summary: "A plain-English account of a fraud model: the score that looked too good, the features that helped, and why the way you split the data decides what you believe."
+published: 2026-11-21
 updated: null
 comments: true
 map: false
