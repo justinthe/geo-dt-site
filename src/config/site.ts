@@ -17,6 +17,8 @@ export const site = {
   },
   // Giscus: fill in after enabling Discussions on the repo (https://giscus.app). Empty = comments hidden.
   giscus: { repo: 'justinthe/geo-dt-site', repoId: '', category: 'Comments', categoryId: '' },
+  // GoatCounter site code (the subdomain of your-code.goatcounter.com). Empty = no analytics script loaded.
+  goatcounter: 'justinthe',
 };
 
 type L = Record<Lang, string>;
