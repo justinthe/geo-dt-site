@@ -469,7 +469,7 @@ The biggest risk is a launch that keeps slipping: a full bilingual content set w
 
 - [ ] Which language serves at the root URL: English or Bahasa Indonesia?
 - [ ] Should Perspectives become a nav category once it has three items?
-- [ ] Use cookieless analytics, or no analytics at all?
+- [x] Use cookieless analytics, or no analytics at all? (GoatCounter, decided 2026-11-22)
 - [ ] Which basemap provider, after checking its usage terms?
 - [ ] Confirm content and code licences (suggested CC BY 4.0 and MIT).
 - [ ] Should both language versions of a post share one comment thread, or have separate threads?
