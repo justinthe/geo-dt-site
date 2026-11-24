@@ -3298,6 +3298,7 @@ Phased numbers are from the first release tag. Commit gaps give a lower bound of
 title: "One Shot or Phases? Building the Same Android App Two Ways"
 lang: en
 translationKey: vibe-compare-one-shot-vs-phases
+coverIllustration: true
 categories: [ai-projects]
 tags: [vibe-coding, android, ai-coding, spec-driven-development, honest-evaluation]
 summary: "I built the same small Android app twice: once in reviewed phases, once in a single pass from an earlier spec. The one-shot reached a broad draft in about an hour, but its spec was out of date and only an emulator run showed it."
