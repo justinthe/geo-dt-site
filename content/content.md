@@ -39,6 +39,7 @@ Status: drafts have open items marked **[TO CONFIRM]**, **[TO WRITE]**, **[ADD]*
 - A17. Spotting bushfire scars from space
 - A18. We Tried to Catch Card Fraud With a Computer. Here Is What Actually Worked.
 - A19. One Shot or Phases? Building the Same Android App Two Ways
+- A20. Explaining a Reranker With LIME and SHAP: What the Explanations Got Right and What Went Wrong
 
 ---
 
@@ -3303,6 +3304,124 @@ categories: [ai-projects]
 tags: [vibe-coding, android, ai-coding, spec-driven-development, honest-evaluation]
 summary: "I built the same small Android app twice: once in reviewed phases, once in a single pass from an earlier spec. The one-shot reached a broad draft in about an hour, but its spec was out of date and only an emulator run showed it."
 published: 2026-11-24
+updated: null
+comments: true
+map: false
+```
+
+## A20. Explaining a Reranker With LIME and SHAP: What the Explanations Got Right and What Went Wrong
+
+*I ran LIME and SHAP on the reranker inside my GeoScholar tool. The explanations held up under deletion tests and across random seeds. Two of my own sanity checks failed, and I changed them after the first run. Here is the method, the numbers, and the mistakes.*
+
+GeoScholar answers questions from 405 remote sensing papers. It works in two steps: a search step finds candidate passages, then a reranker reads each (question, passage) pair and gives it one relevance score. The top-scoring passages go to the language model that writes the answer. The reranker decides what the model gets to see, so I wanted to know what drives its score.
+
+This article covers the method, how I measured the explanations, and where they went wrong. The numbers come from one full run of 50 question-passage pairs. The pairs come from 24 questions, 10 generated from the papers and 14 written by hand. I say what changed between runs, because some of my checks changed.
+
+### What a reranker score is
+
+The reranker is a cross-encoder, `BAAI/bge-reranker-base`. It reads the question and the passage together as one input, so every word can affect every other word. The output is one real number per pair. Higher means more relevant.
+
+The model normally returns that number through a sigmoid, which squashes it into 0 to 1. At the top of the range the sigmoid is nearly flat: the top passages all read 0.98 to 1.0, and attributions computed on that scale come out close to zero. I explained the raw logit instead, the number before the squash. A quick check showed that batch size 16 and batch size 64 give identical logits, so I could use the faster setting.
+
+### Two methods, built by hand
+
+Both methods ask the same question: if I remove some words, how does the score change? They differ in how they combine the answers.
+
+LIME samples random subsets of the passage words, keeping each word with some probability. It scores each subset, weights the samples by how close they are to the full passage, and fits a weighted linear regression. The coefficients are the word weights. The weighting matters: subsets close to the full passage count more.
+
+Kernel SHAP uses the same sampling, but with weights from Shapley values, the way of splitting a total score fairly among players in a game. For a passage with M words and a subset of size s, the weight is (M−1) / (C(M,s) · s · (M−s)). Kernel SHAP fits a weighted regression under a constraint: the word weights must add up to the difference between the full score and the empty-passage score. That constraint is what makes SHAP's numbers add up to the score.
+
+I also computed exact Shapley values over blocks: the title, the section header and each sentence. With about twelve blocks there are at most 4,096 subsets, so the calculation is exact and serves as a baseline.
+
+I did not install the `shap` or `lime` packages. Both are more than a hundred lines of code, and the core is a few dozen lines of numpy and scikit-learn. Writing it myself also made it clear what each step assumes.
+
+### What I expected and what I got
+
+Before running anything I wrote the expectations into a plan. Here they are, with the outcome.
+
+| Expectation | Result |
+|---|---|
+| Removing top words drops the score faster than removing random words | Supported. In all 50 pairs, for both methods |
+| Words that overlap the question carry most of the top weight | Supported. They make up about 65% of the top 10 for generated questions, against 8.5% of all words |
+| Stopwords carry under 10% of content-word weight | Falsified. Stopwords carry about 83% of the weight of other content words |
+| Two random seeds pick mostly the same top words (Jaccard ≥ 0.6) | Supported. 0.71 |
+| LIME and SHAP agree on the top words (Spearman 0.6–0.8) | Supported only on the top words. 0.69 on the union of the top 20, 0.38 over all words |
+| A junk word weighs about zero | Falsified. Dummy weights are mostly negative (see below) |
+| A planted query word becomes the top attribution | Falsified. It is ranked first in 2 of 20 pairs |
+| The title carries 10–30% of the score | Not met. About 5.5% |
+
+### Checks I built in
+
+The method is only useful if its numbers can be trusted, so I built checks that could fail.
+
+Faithfulness. Remove the words in order of their attribution and track the score. If the attribution is right, the score drops fast. Compare with removing words in random order. Insertion is the reverse: start from an empty passage and add the words. Both methods beat random on all 50 pairs. Measured against random, deletion lowers the score by about 0.55 of the total range for LIME and 0.58 for SHAP. Insertion raises it by about 0.59 and 0.55.
+
+Stability. I ran LIME with three random seeds. The top-10 words agree at a Jaccard of 0.71. Kernel SHAP with two seeds agrees at 0.70.
+
+Efficiency. Block Shapley values must add up to the full score minus the empty-passage score. The error across all pairs is at most 8.1e-6.
+
+Dummy words. I insert two nonsense or neutral words at random positions and check their weights. A neutral word should get a weight near zero, and should not stand out from the passage's real words.
+
+Planted word. I add a missing query word to a hard negative, a passage that the reranker ranked below the top. The score should go up, and the word should be among the most important.
+
+### What the numbers say
+
+![Share of top-10 attribution words that overlap the question, by group of questions](images/geoscholar-explain/overlap_by_group.png "Share of the top 10 attributed words that also appear in the question, by question group. n is the number of questions in each group. The group hurt is one generated question, so it is not a reliable comparison.")
+
+The overlap result is the clearest. Words from the question dominate the top attributions, and that holds for generated and hand-written questions alike. The reranker's ranking leans heavily on lexical match. That does not make it only a better keyword search: the explanation shows what moves the score, not whether the remaining weight reflects meaning.
+
+![Dummy word weight percentile within its passage, LIME and SHAP](images/geoscholar-explain/dummy_percentiles.png "Each dummy word's weight, as a percentile of the real words in its passage. The dashed line is the 95th percentile. No dummy word passes it for either method.")
+
+The dummy result has two parts. Dummies do not stand out: the median percentile is 58 for LIME and 47 for SHAP, and none exceeds the 95th percentile. But the sign is not zero. Of 100 dummy weights, 69 are negative for LIME and 80 for SHAP. Those counts would be very unlikely by chance (p = 1.8e-4 and 1.1e-9). The reranker seems to lower its score a little for junk words. My plan expected them to sit near zero, so this result falsifies that expectation.
+
+![LIME and SHAP weights for the words of one passage](images/geoscholar-explain/lime_vs_shap_pair.png "LIME weight against SHAP weight for every word of one passage, with the five largest labelled. The two methods agree on the large weights and disagree on the small ones.")
+
+The scatter shows what the agreement number hides. The methods agree on the few words that matter. Across all words they agree much less, with a Spearman of 0.38. Read the top-20 union number and the all-words number together, because each one alone gives a different picture.
+
+The planted-word result is weaker than I hoped. The added word's logit rose in 15 of 20 cases, by 0.58 on average. But it was ranked first in only 2. The median rank was 3. Adding a query word raises the score, but that word does not dominate the explanation.
+
+### What went wrong
+
+I made several mistakes along the way. Each one changed a number, so I list them in the order I found them.
+
+1. Saturated scores. The first attributions were computed on the squashed score, so most values were near zero. Switching to the raw logit fixed it.
+
+2. Too few samples for Kernel SHAP. For passages longer than about 300 words, my first setting of 300 samples was fewer than the number of words, so the regression was underdetermined. LIME and SHAP disagreed, with a negative correlation. Paired sampling, adding the complement of each sample, gave a stable estimate at the same cost.
+
+3. A sign error in the normalisation. I divided by the signed score difference. For hard negatives, where the score is below the empty-passage score, the sign flipped and the comparison with random inverted. The fix was the absolute value.
+
+4. My headline Spearman was the wrong one. After the first run, I reported the all-words correlation, 0.38, as the headline. The plan specified the correlation on the top-20 union, which gives 0.69. I had written the plan's definition down and then implemented a different one. I corrected it after review. Both numbers appear in this article, labelled.
+
+5. Criteria changed after the first results. The first plan counted a dummy word in the top 20 as a failure. That count was 16 of 50 pairs. I judged it noise: in the earlier data, words at rank 20 sat around the 75th percentile of their passage, which is not an outlier. I replaced it with the percentile test and the sign test. The top-20 count is still in the output, labelled legacy. This is a change made after seeing the results, and you should weigh it that way.
+
+6. Mislabelled question groups. The script put every manual question in the "manual" group, so the five manual questions where reranking hurt were never counted as hurt. The fix made them count in both groups.
+
+7. A nondeterministic tie-break. When two query words had the same length, the planted word depended on Python's hash seed, so the results changed from run to run. The fix sorts by length, then alphabetically, and the planted numbers are now reproducible.
+
+8. Stale output. Earlier runs left result files that did not match the code. I moved them aside, and the numbers quoted here come only from the final run.
+
+### What this does and does not tell you
+
+It does tell you that the attributions reflect the model. Removing the words they flag lowers the score faster than removing random words, consistently, and two seeds broadly agree.
+
+It does not tell you why the reranker judges a passage relevant. The score is one number, and the explanation shows what moves it, not what it means. It also does not tell you that the reranker ignores stopwords: they carry real weight in this setup, which suggests that removing them changes how the model reads the sentence, not only what it means.
+
+It does not show the method works for other models. The results come from one reranker on one domain, with 50 pairs from 24 questions. Only one question was hurt by reranking, so I cannot say anything about where the reranker goes wrong.
+
+If you want to use LIME or SHAP on your own text model, three points from this work are worth keeping. First, explain the raw score, not a squashed one. Second, check faithfulness before you trust the attributions, with deletion and insertion against random. Third, write your success criteria down before the run, and keep them when the results disappoint you.
+
+The code is described here, not published. Every number comes from a result file the method produced, and the tables and charts say what each one measures.
+
+### Site metadata
+
+```yaml
+title: "Explaining a Reranker With LIME and SHAP: What the Explanations Got Right and What Went Wrong"
+lang: en
+translationKey: geoscholar-explain
+categories: [ai-projects]
+tags: [lime, shap, explainability, reranking, rag, evaluation]
+summary: "I ran LIME and SHAP on the reranker in my GeoScholar tool. The explanations held up under deletion tests and across seeds, and two of my own checks failed and were changed after the first run."
+published: 2026-11-25
 updated: null
 comments: true
 map: false
